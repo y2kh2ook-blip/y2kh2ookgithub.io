@@ -74,21 +74,35 @@
 
     // Initialize Firebase
     // เริ่มต้นใช้งาน Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    let app, db;
+    try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        console.log("Firebase initialized successfully.");
+    } catch (e) {
+        console.error("Error initializing Firebase:", e);
+        showMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ Firebase โปรดตรวจสอบโค้ด Config ของคุณ", "error");
+    }
 
     // --- Firebase Data Fetching Function ---
     // ฟังก์ชันสำหรับดึงข้อมูลการ์ดจาก Firestore
     async function getCardDataBySerialNumber(serialNumber) {
+        if (!db) {
+            console.error("Firestore database not initialized.");
+            showMessage("ไม่สามารถเชื่อมต่อฐานข้อมูลได้", "error");
+            return null;
+        }
+
         try {
             const cardsRef = collection(db, 'cards');
             const q = query(cardsRef, where('serialNumber', '==', serialNumber));
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
-                console.log("ไม่พบการ์ดที่ตรงกัน.");
+                console.log(`ไม่พบการ์ดที่ตรงกับ serial number: ${serialNumber}`);
                 return null;
             } else {
+                console.log("พบการ์ดแล้ว! กำลังแสดงข้อมูล...");
                 return querySnapshot.docs[0].data();
             }
 
