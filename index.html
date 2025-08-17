@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardVerse PoC</title>
+    <title>CardVerse MVP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -19,12 +19,12 @@
 <body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
 
 <div class="container mx-auto p-8 bg-gray-800 rounded-3xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-6 text-indigo-400">CardVerse PoC</h1>
+    <h1 class="text-3xl font-bold text-center mb-6 text-indigo-400">CardVerse MVP</h1>
 
     <div id="welcome-screen" class="flex flex-col items-center">
         <p class="text-center text-lg mb-8">
-            นี่คือระบบจำลองการเชื่อมโยงการ์ด Phygital กับข้อมูลดิจิทัล<br>
-            เพียงแค่กดปุ่มแล้วแตะการ์ด NFC
+            ยินดีต้อนรับสู่ CardVerse<br>
+            แตะเพื่อสแกนการ์ด
         </p>
         <button id="scanButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 transform hover:scale-105 shadow-xl">
             แตะเพื่อสแกนการ์ด
@@ -43,45 +43,65 @@
 
 </div>
 
-<script>
-    // This is the updated mock database.
-    // นี่คือฐานข้อมูลจำลองที่ปรับปรุงแล้ว
-    const cardverseMockDB = {
-        "nfc-card-12345": {
-            "name": "นักรบแห่งรุ่งอรุณ",
-            "description": "นักรบผู้กล้าหาญที่นำแสงสว่างมาสู่สมรภูมิ",
-            "power": { "attack": 500, "defense": 400 },
-            "rarity": "Common",
-            "imageUrl": "https://placehold.co/300x400/2c3e50/ecf0f1?text=Warrior",
-            "tokenId": "0x1A2B3C4D5E6F7G8H9I0J",
-            "ownerId": "user12345"
-        },
-        "nfc-card-67890": {
-            "name": "จอมเวทย์เงา",
-            "description": "ผู้ควบคุมพลังแห่งความมืดและมายา",
-            "power": { "attack": 300, "defense": 600 },
-            "rarity": "Rare",
-            "imageUrl": "https://placehold.co/300x400/34495e/ecf0f1?text=Mage",
-            "tokenId": "0x2B3C4D5E6F7G8H9I0J1K",
-            "ownerId": "user54321"
-        },
-        "nfc-card-abcde": {
-            "name": "มังกรเพลิง",
-            "description": "สิ่งมีชีวิตในตำนานที่สร้างความหวาดกลัวด้วยลมหายใจแห่งไฟ",
-            "power": { "attack": 900, "defense": 800 },
-            "rarity": "Legendary",
-            "imageUrl": "https://placehold.co/300x400/c0392b/ecf0f1?text=Dragon",
-            "tokenId": "0x3C4D5E6F7G8H9I0J1K2L",
-            "ownerId": "user12345"
-        }
-    };
+<script type="module">
+    // --- Firebase SDKs ---
+    // Make sure you have added Firebase to your project from the console.
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // --- Firebase Configuration ---
+    // IMPORTANT: Replace the placeholders below with your actual Firebase project config.
+    // ข้อมูลการเชื่อมต่อ Firebase ของคุณ (นำมาจาก Project settings ใน Firebase Console)
+    const firebaseConfig = {
+  apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
+  authDomain: "cardverse-mvp.firebaseapp.com",
+  projectId: "cardverse-mvp",
+  storageBucket: "cardverse-mvp.firebasestorage.app",
+  messagingSenderId: "787364486859",
+  appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
+  measurementId: "G-WHQ7CV91X0"
+};
+
+    // Initialize Firebase
+    // เริ่มต้นใช้งาน Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // --- Firebase Data Fetching Function ---
+    // ฟังก์ชันสำหรับดึงข้อมูลการ์ดจาก Firestore
+    async function getCardDataBySerialNumber(serialNumber) {
+        try {
+            // สร้างการอ้างอิงไปยัง collection 'cards'
+            const cardsRef = collection(db, 'cards');
+
+            // สร้าง query เพื่อหา document ที่มี serialNumber ตรงกัน
+            const q = query(cardsRef, where('serialNumber', '==', serialNumber));
+
+            // ดึงเอกสารที่ตรงกับ query
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                console.log("ไม่พบการ์ดที่ตรงกัน.");
+                return null;
+            } else {
+                // ส่งคืนข้อมูลของเอกสารแรกที่พบ
+                return querySnapshot.docs[0].data();
+            }
+
+        } catch (error) {
+            console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
+            return null;
+        }
+    }
+
+    // --- DOM Elements ---
     const scanButton = document.getElementById('scanButton');
     const cardDisplay = document.getElementById('card-display');
     const welcomeScreen = document.getElementById('welcome-screen');
     const cardInfo = document.getElementById('card-info');
     const messageBox = document.getElementById('message-box');
 
+    // --- UI Utility Functions ---
     const showMessage = (message, type) => {
         messageBox.textContent = message;
         messageBox.className = 'text-center font-semibold mb-4';
@@ -93,14 +113,8 @@
     };
 
     const displayCardData = (data) => {
-        cardInfo.innerHTML = ''; // Clear previous content
-
-        // Add an image element to the display.
-        // เพิ่มส่วนนี้เพื่อแสดงรูปภาพ
+        cardInfo.innerHTML = '';
         cardInfo.innerHTML += `<img src="${data.imageUrl}" alt="${data.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md" />`;
-
-        // Display card details.
-        // แสดงรายละเอียดการ์ด
         cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal text-indigo-300">${data.name}</span></p>`;
         cardInfo.innerHTML += `<p class="text-sm font-light text-gray-400 italic">${data.description}</p>`;
         cardInfo.innerHTML += `<p class="text-base mt-2">พลัง: <span class="font-bold text-red-400">${data.power.attack} ATK</span>, <span class="font-bold text-blue-400">${data.power.defense} DEF</span></p>`;
@@ -108,11 +122,11 @@
         cardInfo.innerHTML += `<p class="text-xs mt-4 break-all">Token ID: <span class="font-mono text-gray-400">${data.tokenId}</span></p>`;
     };
 
+    // --- Main Logic ---
     scanButton.addEventListener('click', async () => {
         welcomeScreen.classList.add('hidden');
         cardDisplay.classList.remove('hidden');
         
-        // Check for NFC support
         if ('NDEFReader' in window) {
             try {
                 const ndef = new NDEFReader();
@@ -120,16 +134,19 @@
 
                 await ndef.scan();
                 
-                ndef.onreading = event => {
+                ndef.onreading = async event => {
                     const serialNumber = new TextDecoder().decode(event.serialNumber);
-                    const cardData = cardverseMockDB[serialNumber];
+                    
+                    // Call the Firebase function to get data
+                    // เรียกใช้ฟังก์ชัน Firebase เพื่อดึงข้อมูลการ์ด
+                    const cardData = await getCardDataBySerialNumber(serialNumber);
 
                     if (cardData) {
                         displayCardData(cardData);
                         showMessage('สแกนสำเร็จ!', 'success');
                     } else {
                         cardInfo.innerHTML = '';
-                        showMessage('ไม่พบข้อมูลการ์ดนี้', 'error');
+                        showMessage('ไม่พบข้อมูลการ์ดนี้ในฐานข้อมูล', 'error');
                     }
                 };
 
