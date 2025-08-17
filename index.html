@@ -3,141 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardVerse NFC PoC</title>
+    <title>CardVerse PoC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
+            background-color: #1a1a2e;
+        }
+        .container {
+            max-width: 600px;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-lg text-center space-y-6">
-        <h1 class="text-3xl font-bold text-gray-800">CardVerse PoC: ทดสอบระบบ NFC</h1>
-        <p class="text-gray-600">กดปุ่มด้านล่างเพื่อเริ่มสแกนการ์ดจริงด้วยชิป NFC</p>
+<div class="container mx-auto p-8 bg-gray-800 rounded-3xl shadow-lg">
+    <h1 class="text-3xl font-bold text-center mb-6 text-indigo-400">CardVerse PoC</h1>
 
-        <!-- The main button to initiate the NFC scan -->
-        <button id="scanButton" class="w-full py-4 px-6 bg-gray-900 text-white font-semibold rounded-xl shadow-lg hover:bg-gray-700 transition-colors">
+    <div id="welcome-screen" class="flex flex-col items-center">
+        <p class="text-center text-lg mb-8">
+            นี่คือระบบจำลองการเชื่อมโยงการ์ด Phygital กับข้อมูลดิจิทัล<br>
+            เพียงแค่กดปุ่มแล้วแตะการ์ด NFC
+        </p>
+        <button id="scanButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 transform hover:scale-105 shadow-xl">
             แตะเพื่อสแกนการ์ด
         </button>
-
-        <!-- Message box for user feedback (instead of alert) -->
-        <div id="messageBox" class="hidden p-4 rounded-xl text-center text-sm font-medium" role="alert"></div>
-
-        <!-- Display area for the scanned card data -->
-        <div id="cardDisplay" class="hidden p-6 bg-gray-100 rounded-xl text-left border-2 border-dashed border-gray-300">
-            <h2 class="text-xl font-bold text-gray-800 mb-2">ข้อมูลการ์ดที่สแกนได้</h2>
-            <div id="cardInfo" class="space-y-2">
-                <!-- Card information will be displayed here dynamically -->
-            </div>
-        </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scanButton = document.getElementById('scanButton');
-            const cardDisplay = document.getElementById('cardDisplay');
-            const cardInfo = document.getElementById('cardInfo');
-            const messageBox = document.getElementById('messageBox');
+    <div id="card-display" class="hidden flex flex-col items-center p-6 bg-gray-700 rounded-2xl shadow-inner mt-8">
+        <p id="message-box" class="text-center font-semibold mb-4 text-green-400"></p>
+        <div id="card-info" class="flex flex-col items-center text-center">
+            <!-- Card data will be displayed here -->
+        </div>
+        <button onclick="window.location.reload()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full mt-6 transition duration-300">
+            สแกนอีกครั้ง
+        </button>
+    </div>
 
-            // Simulate a mock database for card data lookup
-            // จำลองฐานข้อมูลสำหรับค้นหาข้อมูลการ์ด
-            const mockCardDatabase = {
-                // In a real application, you would replace these with real NFC serial numbers
-                // ในแอปจริง คุณจะแทนที่ค่าเหล่านี้ด้วยหมายเลขซีเรียล NFC ของจริง
-                'nfc-card-12345': {
-                    name: 'นักรบแห่งรุ่งอรุณ',
-                    description: 'นักรบผู้กล้าหาญที่นำแสงสว่างมาสู่สมรภูมิ',
-                    power: 'ATK: 500, DEF: 400',
-                    rarity: 'Common',
-                    tokenId: '0x1A2B3C4D'
-                },
-                'nfc-card-67890': {
-                    name: 'จอมเวทย์เงา',
-                    description: 'ผู้ควบคุมพลังแห่งความมืดและมายา',
-                    power: 'ATK: 300, DEF: 600',
-                    rarity: 'Rare',
-                    tokenId: '0x5E6F7G8H'
-                }
-            };
+</div>
 
-            // Function to display messages to the user
-            // ฟังก์ชันสำหรับแสดงข้อความแจ้งเตือน
-            const showMessage = (text, type = 'info') => {
-                messageBox.textContent = text;
-                messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
-                if (type === 'error') {
-                    messageBox.classList.add('bg-red-100', 'text-red-700');
-                } else if (type === 'success') {
-                    messageBox.classList.add('bg-green-100', 'text-green-700');
-                } else {
-                    messageBox.classList.add('bg-blue-100', 'text-blue-700');
-                }
-            };
+<script>
+    // This is the updated mock database.
+    // นี่คือฐานข้อมูลจำลองที่ปรับปรุงแล้ว
+    const cardverseMockDB = {
+        "nfc-card-12345": {
+            "name": "นักรบแห่งรุ่งอรุณ",
+            "description": "นักรบผู้กล้าหาญที่นำแสงสว่างมาสู่สมรภูมิ",
+            "power": { "attack": 500, "defense": 400 },
+            "rarity": "Common",
+            "imageUrl": "https://placehold.co/300x400/2c3e50/ecf0f1?text=Warrior",
+            "tokenId": "0x1A2B3C4D5E6F7G8H9I0J",
+            "ownerId": "user12345"
+        },
+        "nfc-card-67890": {
+            "name": "จอมเวทย์เงา",
+            "description": "ผู้ควบคุมพลังแห่งความมืดและมายา",
+            "power": { "attack": 300, "defense": 600 },
+            "rarity": "Rare",
+            "imageUrl": "https://placehold.co/300x400/34495e/ecf0f1?text=Mage",
+            "tokenId": "0x2B3C4D5E6F7G8H9I0J1K",
+            "ownerId": "user54321"
+        },
+        "nfc-card-abcde": {
+            "name": "มังกรเพลิง",
+            "description": "สิ่งมีชีวิตในตำนานที่สร้างความหวาดกลัวด้วยลมหายใจแห่งไฟ",
+            "power": { "attack": 900, "defense": 800 },
+            "rarity": "Legendary",
+            "imageUrl": "https://placehold.co/300x400/c0392b/ecf0f1?text=Dragon",
+            "tokenId": "0x3C4D5E6F7G8H9I0J1K2L",
+            "ownerId": "user12345"
+        }
+    };
 
-            // Function to display card data
-            // ฟังก์ชันสำหรับแสดงข้อมูลการ์ด
-            const displayCardData = (data) => {
-                cardInfo.innerHTML = '';
-                cardDisplay.classList.remove('hidden');
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal">${data.name}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">รายละเอียด: <span class="font-normal">${data.description}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ค่าพลัง: <span class="font-normal">${data.power}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ระดับ: <span class="font-normal">${data.rarity}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">สถานะการเป็นเจ้าของ (Token ID): <span class="font-normal">${data.tokenId}</span></p>`;
-                showMessage('สแกนสำเร็จ!', 'success');
-            };
+    const scanButton = document.getElementById('scanButton');
+    const cardDisplay = document.getElementById('card-display');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const cardInfo = document.getElementById('card-info');
+    const messageBox = document.getElementById('message-box');
 
-            // The core NFC logic
-            // ส่วนหลักของตรรกะ NFC
-            scanButton.addEventListener('click', async () => {
-                // Check if the browser supports Web NFC
-                // ตรวจสอบว่าเบราว์เซอร์รองรับ Web NFC หรือไม่
-                if ('NDEFReader' in window) {
-                    try {
-                        const ndef = new NDEFReader();
-                        
-                        // Start scanning for NFC tags
-                        // เริ่มต้นสแกนหา NFC tags
-                        await ndef.scan();
-                        showMessage('แตะการ์ดที่ด้านหลังอุปกรณ์เพื่อสแกน', 'info');
+    const showMessage = (message, type) => {
+        messageBox.textContent = message;
+        messageBox.className = 'text-center font-semibold mb-4';
+        if (type === 'success') {
+            messageBox.classList.add('text-green-400');
+        } else if (type === 'error') {
+            messageBox.classList.add('text-red-400');
+        }
+    };
 
-                        // Event listener for a successful read
-                        // Listener สำหรับการอ่านข้อมูลสำเร็จ
-                        ndef.onreading = (event) => {
-                            // The serial number is a unique ID of the NFC tag
-                            // หมายเลขซีเรียลคือ ID ที่ไม่ซ้ำกันของชิป NFC
-                            const serialNumber = event.serialNumber;
-                            
-                            // Look up card data based on the serial number
-                            // ค้นหาข้อมูลการ์ดโดยใช้หมายเลขซีเรียล
-                            const cardData = mockCardDatabase[serialNumber] || {
-                                name: 'ไม่พบการ์ดนี้',
-                                description: 'การ์ดใบนี้ไม่ตรงกับฐานข้อมูล',
-                                power: '-', rarity: '-', tokenId: '-'
-                            };
-                            
-                            displayCardData(cardData);
-                        };
+    const displayCardData = (data) => {
+        cardInfo.innerHTML = ''; // Clear previous content
 
-                        // Event listener for a reading error
-                        // Listener สำหรับกรณีที่อ่านข้อมูลไม่ได้
-                        ndef.onreadingerror = (event) => {
-                            showMessage('ไม่สามารถอ่านการ์ดได้', 'error');
-                        };
+        // Add an image element to the display.
+        // เพิ่มส่วนนี้เพื่อแสดงรูปภาพ
+        cardInfo.innerHTML += `<img src="${data.imageUrl}" alt="${data.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md" />`;
 
-                    } catch (error) {
-                        showMessage(`ไม่สามารถเริ่มการสแกนได้: ${error.message}`, 'error');
+        // Display card details.
+        // แสดงรายละเอียดการ์ด
+        cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal text-indigo-300">${data.name}</span></p>`;
+        cardInfo.innerHTML += `<p class="text-sm font-light text-gray-400 italic">${data.description}</p>`;
+        cardInfo.innerHTML += `<p class="text-base mt-2">พลัง: <span class="font-bold text-red-400">${data.power.attack} ATK</span>, <span class="font-bold text-blue-400">${data.power.defense} DEF</span></p>`;
+        cardInfo.innerHTML += `<p class="text-base">ความหายาก: <span class="font-semibold text-yellow-400">${data.rarity}</span></p>`;
+        cardInfo.innerHTML += `<p class="text-xs mt-4 break-all">Token ID: <span class="font-mono text-gray-400">${data.tokenId}</span></p>`;
+    };
+
+    scanButton.addEventListener('click', async () => {
+        welcomeScreen.classList.add('hidden');
+        cardDisplay.classList.remove('hidden');
+        
+        // Check for NFC support
+        if ('NDEFReader' in window) {
+            try {
+                const ndef = new NDEFReader();
+                showMessage('แตะการ์ดที่ด้านหลังอุปกรณ์เพื่อสแกน', 'success');
+
+                await ndef.scan();
+                
+                ndef.onreading = event => {
+                    const serialNumber = new TextDecoder().decode(event.serialNumber);
+                    const cardData = cardverseMockDB[serialNumber];
+
+                    if (cardData) {
+                        displayCardData(cardData);
+                        showMessage('สแกนสำเร็จ!', 'success');
+                    } else {
+                        cardInfo.innerHTML = '';
+                        showMessage('ไม่พบข้อมูลการ์ดนี้', 'error');
                     }
-                } else {
-                    showMessage('เบราว์เซอร์ของคุณไม่รองรับ Web NFC', 'error');
-                }
-            });
-        });
-    </script>
+                };
+
+            } catch (error) {
+                console.error("Error during NFC scan:", error);
+                showMessage('ไม่สามารถเริ่มการสแกนได้: ' + error.message, 'error');
+            }
+        } else {
+            showMessage('อุปกรณ์นี้ไม่รองรับ Web NFC API', 'error');
+        }
+    });
+
+</script>
 
 </body>
 </html>
