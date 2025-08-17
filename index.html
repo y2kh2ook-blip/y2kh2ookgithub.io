@@ -24,11 +24,22 @@
     <div id="welcome-screen" class="flex flex-col items-center">
         <p class="text-center text-lg mb-8">
             ยินดีต้อนรับสู่ CardVerse<br>
-            แตะเพื่อสแกนการ์ด
+            แตะเพื่อสแกนการ์ด หรือกรอกรหัสด้วยตนเอง
         </p>
-        <button id="scanButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 transform hover:scale-105 shadow-xl">
-            แตะเพื่อสแกนการ์ด
+
+        <!-- NFC Scan Button -->
+        <button id="scanButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 transform hover:scale-105 shadow-xl mb-4">
+            แตะเพื่อสแกนการ์ด (บนอุปกรณ์ที่รองรับ)
         </button>
+
+        <!-- Manual Input Section -->
+        <div class="w-full flex flex-col items-center">
+            <p class="text-gray-400 text-sm mb-2">หรือกรอกรหัสการ์ดด้วยตนเอง</p>
+            <input type="text" id="serialInput" placeholder="ตัวอย่าง: nfc-card-12345" class="w-full max-w-xs p-2 text-center rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4" />
+            <button id="manualScanButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 transform hover:scale-105 shadow-md">
+                ดึงข้อมูลการ์ด
+            </button>
+        </div>
     </div>
 
     <div id="card-display" class="hidden flex flex-col items-center p-6 bg-gray-700 rounded-2xl shadow-inner mt-8">
@@ -45,7 +56,6 @@
 
 <script type="module">
     // --- Firebase SDKs ---
-    // Make sure you have added Firebase to your project from the console.
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -71,20 +81,14 @@
     // ฟังก์ชันสำหรับดึงข้อมูลการ์ดจาก Firestore
     async function getCardDataBySerialNumber(serialNumber) {
         try {
-            // สร้างการอ้างอิงไปยัง collection 'cards'
             const cardsRef = collection(db, 'cards');
-
-            // สร้าง query เพื่อหา document ที่มี serialNumber ตรงกัน
             const q = query(cardsRef, where('serialNumber', '==', serialNumber));
-
-            // ดึงเอกสารที่ตรงกับ query
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
                 console.log("ไม่พบการ์ดที่ตรงกัน.");
                 return null;
             } else {
-                // ส่งคืนข้อมูลของเอกสารแรกที่พบ
                 return querySnapshot.docs[0].data();
             }
 
@@ -96,6 +100,8 @@
 
     // --- DOM Elements ---
     const scanButton = document.getElementById('scanButton');
+    const manualScanButton = document.getElementById('manualScanButton');
+    const serialInput = document.getElementById('serialInput');
     const cardDisplay = document.getElementById('card-display');
     const welcomeScreen = document.getElementById('welcome-screen');
     const cardInfo = document.getElementById('card-info');
@@ -122,34 +128,39 @@
         cardInfo.innerHTML += `<p class="text-xs mt-4 break-all">Token ID: <span class="font-mono text-gray-400">${data.tokenId}</span></p>`;
     };
 
-    // --- Main Logic ---
-    scanButton.addEventListener('click', async () => {
+    const handleScan = async (serialNumber) => {
         welcomeScreen.classList.add('hidden');
         cardDisplay.classList.remove('hidden');
-        
+
+        if (!serialNumber || serialNumber.trim() === '') {
+            showMessage('โปรดกรอกรหัสการ์ดเพื่อทดสอบ', 'error');
+            return;
+        }
+
+        showMessage('กำลังดึงข้อมูล...', 'success');
+        const cardData = await getCardDataBySerialNumber(serialNumber);
+
+        if (cardData) {
+            displayCardData(cardData);
+            showMessage('ดึงข้อมูลสำเร็จ!', 'success');
+        } else {
+            cardInfo.innerHTML = '';
+            showMessage('ไม่พบข้อมูลการ์ดนี้ในฐานข้อมูล', 'error');
+        }
+    };
+
+    // --- Event Listeners ---
+    scanButton.addEventListener('click', async () => {
+        // This part handles the NFC scan if the device supports it
         if ('NDEFReader' in window) {
             try {
                 const ndef = new NDEFReader();
                 showMessage('แตะการ์ดที่ด้านหลังอุปกรณ์เพื่อสแกน', 'success');
-
                 await ndef.scan();
-                
                 ndef.onreading = async event => {
                     const serialNumber = new TextDecoder().decode(event.serialNumber);
-                    
-                    // Call the Firebase function to get data
-                    // เรียกใช้ฟังก์ชัน Firebase เพื่อดึงข้อมูลการ์ด
-                    const cardData = await getCardDataBySerialNumber(serialNumber);
-
-                    if (cardData) {
-                        displayCardData(cardData);
-                        showMessage('สแกนสำเร็จ!', 'success');
-                    } else {
-                        cardInfo.innerHTML = '';
-                        showMessage('ไม่พบข้อมูลการ์ดนี้ในฐานข้อมูล', 'error');
-                    }
+                    handleScan(serialNumber);
                 };
-
             } catch (error) {
                 console.error("Error during NFC scan:", error);
                 showMessage('ไม่สามารถเริ่มการสแกนได้: ' + error.message, 'error');
@@ -159,6 +170,16 @@
         }
     });
 
+    manualScanButton.addEventListener('click', () => {
+        const serialNumber = serialInput.value.trim();
+        handleScan(serialNumber);
+    });
+
+    serialInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            manualScanButton.click();
+        }
+    });
 </script>
 
 </body>
