@@ -3,204 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardVerse MVP</title>
+    <title>CardVerse: การ์ดพร้อม Token ID และระดับความหายาก (ปรับปรุง)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a1a2e;
+            font-family: 'Sarabun', sans-serif;
+            background-color: #0b0c1e;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            gap: 2rem;
         }
-        .container {
-            max-width: 600px;
+
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .card-front {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 2.5 / 3.5;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(107, 76, 255, 0.5);
+            background: linear-gradient(135deg, #1f123d, #3c296f);
+        }
+        
+        .card-front-inner {
+            position: relative;
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
+            margin: 10px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background-color: #2a1e4a;
+            z-index: 2;
+        }
+
+        .card-image-placeholder {
+            width: 100%;
+            height: 60%;
+            background-color: #2b2b4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 2px solid #6b4cff;
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+        }
+
+        .card-image-placeholder {
+            background-image: url('https://placehold.co/600x960/2b2b4a/ffffff?text=อัปโหลดรูปภาพของคุณที่นี่');
+        }
+
+        .card-header {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-cost {
+            font-size: 1rem;
+            color: #b3d9ff;
+        }
+        .card-name-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffffff;
+            flex-grow: 1;
+            text-align: center;
+            margin: 0 10px;
+        }
+        .card-token-id {
+            font-size: 0.8rem;
+            color: #b3d9ff;
+        }
+
+        /* NEW: Updated stats section layout */
+        .card-stats {
+            display: flex;
+            justify-content: space-around;
+            align-items: center; /* Align items vertically */
+            padding: 10px 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #b3d9ff;
+        }
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        /* NEW: Cost in stats section */
+        .stat-cost-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #b3d9ff;
+            padding: 0 10px;
+            border-left: 1px solid #6b4cff;
+            border-right: 1px solid #6b4cff;
+        }
+        .stat-cost-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #feca57; /* Highlight with a distinct color */
+        }
+
+        .card-body {
+            padding: 1rem;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .card-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-description {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+        }
+        .text-center {
+            text-align: center;
+        }
+
+        .rarity-tag {
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .rarity-common { background-color: #6a6a6a; }
+        .rarity-rare { background-color: #4a69bd; }
+        .rarity-epic { background-color: #8854d0; }
+        .rarity-legendary { background-color: #d63031; }
+        .rarity-mythic { background-color: #feca57; }
+
+        .thai-scifi-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glow-path {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .dash-path {
+            animation: dash-move 5s linear infinite;
+        }
+
+        @keyframes glow {
+            from {
+                stroke: #6b4cff;
+                filter: drop-shadow(0 0 5px #6b4cff);
+            }
+            to {
+                stroke: #b3d9ff;
+                filter: drop-shadow(0 0 15px #b3d9ff);
+            }
+        }
+        
+        @keyframes dash-move {
+            to {
+                stroke-dashoffset: -100;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-900 text-white">
 
-<div class="container mx-auto p-8 bg-gray-800 rounded-3xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-6 text-indigo-400">CardVerse MVP</h1>
-
-    <div id="welcome-screen" class="flex flex-col items-center">
-        <p class="text-center text-lg mb-8">
-            ยินดีต้อนรับสู่ CardVerse<br>
-            แตะเพื่อสแกนการ์ด หรือกรอกรหัสด้วยตนเอง
-        </p>
-
-        <!-- NFC Scan Button -->
-        <button id="scanButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 transform hover:scale-105 shadow-xl mb-4">
-            แตะเพื่อสแกนการ์ด (บนอุปกรณ์ที่รองรับ)
-        </button>
-
-        <!-- Manual Input Section -->
-        <div class="w-full flex flex-col items-center">
-            <p class="text-gray-400 text-sm mb-2">หรือกรอกรหัสการ์ดด้วยตนเอง</p>
-            <input type="text" id="serialInput" placeholder="ตัวอย่าง: nfc-card-12345" class="w-full max-w-xs p-2 text-center rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4" />
-            <button id="manualScanButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 transform hover:scale-105 shadow-md">
-                ดึงข้อมูลการ์ด
-            </button>
-        </div>
+    <div class="text-center">
+        <h1 class="text-3xl font-bold mb-4">CardVerse: การ์ดพร้อม Token ID และระดับความหายาก (ปรับปรุง)</h1>
+        <p class="text-lg mb-2">ตัวอย่างการ์ดที่มี Cost ย้ายมาอยู่ตรงกลางระหว่างพลังโจมตีและพลังป้องกัน</p>
     </div>
 
-    <div id="card-display" class="hidden flex flex-col items-center p-6 bg-gray-700 rounded-2xl shadow-inner mt-8">
-        <p id="message-box" class="text-center font-semibold mb-4 text-green-400"></p>
-        <div id="card-info" class="flex flex-col items-center text-center">
-            <!-- Card data will be displayed here -->
+    <div class="card-container">
+        <!-- Card Front -->
+        <div class="card-front">
+            <!-- SVG for Thai-Sci-Fi Frame with animations -->
+            <svg class="thai-scifi-frame" viewBox="0 0 250 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path class="glow-path" d="M20 5 L20 345 C20 345 230 345 230 345 L230 5 C230 5 20 5 20 5 Z" stroke="#6b4cff" stroke-width="2" opacity="0.6"/>
+                <path class="dash-path" d="M25 10 L25 340 C25 340 225 340 225 340 L225 10 C225 10 25 10 25 10 Z" stroke="#b3d9ff" stroke-width="1" stroke-dasharray="10" opacity="0.4"/>
+                <path d="M 20 5 H 50 L 25 30 Z" fill="#b3d9ff" opacity="0.8"/>
+                <path d="M 230 5 H 200 L 225 30 Z" fill="#b3d9ff" opacity="0.8"/>
+                <path d="M 20 345 H 50 L 25 320 Z" fill="#b3d9ff" opacity="0.8"/>
+                <path d="M 230 345 H 200 L 225 320 Z" fill="#b3d9ff" opacity="0.8"/>
+            </svg>
+
+            <!-- Card Content -->
+            <div class="card-front-inner">
+                <!-- Character Image Placeholder -->
+                <div class="card-image-placeholder">
+                </div>
+
+                <!-- Header -->
+                <div class="card-header">
+                    <div class="header-left">
+                        <span class="rarity-tag rarity-rare">RARE</span>
+                    </div>
+                    <span class="card-name-title">The Rogue AI</span>
+                    <span class="card-token-id">#001</span>
+                </div>
+
+                <!-- NEW: Updated Card Stats with Cost in the middle -->
+                <div class="card-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">250</span>
+                        <span>พลังโจมตี</span>
+                    </div>
+                    <div class="stat-cost-item">
+                        <span class="stat-cost-value">3</span>
+                        <span>Cost</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">150</span>
+                        <span>พลังป้องกัน</span>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="card-name">กระสือ (Krasue)</div>
+                    <div class="card-description">"หน่วยโดรนสอดแนมที่ถูกดัดแปลงพันธุกรรม มีส่วนหัวที่แยกออกจากร่างกายและบินได้อย่างเงียบเชียบ"</div>
+                    <p class="text-xs text-yellow-400 mt-2">ความสามารถ: Night Patrol - หากในสนามมี "Night" Effect อยู่ สามารถโจมตีใส่ "Trap" Card ของคู่ต่อสู้ได้โดยตรง</p>
+                </div>
+            </div>
         </div>
-        <button onclick="window.location.reload()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full mt-6 transition duration-300">
-            สแกนอีกครั้ง
-        </button>
     </div>
-
-</div>
-
-<script type="module">
-    // --- Firebase SDKs ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    // --- Firebase Configuration ---
-    // IMPORTANT: Replace the placeholders below with your actual Firebase project config.
-    // ข้อมูลการเชื่อมต่อ Firebase ของคุณ (นำมาจาก Project settings ใน Firebase Console)
-    const firebaseConfig = {
-  apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
-  authDomain: "cardverse-mvp.firebaseapp.com",
-  projectId: "cardverse-mvp",
-  storageBucket: "cardverse-mvp.firebasestorage.app",
-  messagingSenderId: "787364486859",
-  appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
-  measurementId: "G-WHQ7CV91X0"
-};
-
-    // Initialize Firebase
-    // เริ่มต้นใช้งาน Firebase
-    let app, db;
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        console.log("Firebase initialized successfully.");
-    } catch (e) {
-        console.error("Error initializing Firebase:", e);
-        showMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ Firebase โปรดตรวจสอบโค้ด Config ของคุณ", "error");
-    }
-
-    // --- Firebase Data Fetching Function ---
-    // ฟังก์ชันสำหรับดึงข้อมูลการ์ดจาก Firestore
-    async function getCardDataBySerialNumber(serialNumber) {
-        if (!db) {
-            console.error("Firestore database not initialized.");
-            showMessage("ไม่สามารถเชื่อมต่อฐานข้อมูลได้", "error");
-            return null;
-        }
-
-        try {
-            const cardsRef = collection(db, 'cards');
-            const q = query(cardsRef, where('serialNumber', '==', serialNumber));
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty) {
-                console.log(`ไม่พบการ์ดที่ตรงกับ serial number: ${serialNumber}`);
-                return null;
-            } else {
-                console.log("พบการ์ดแล้ว! กำลังแสดงข้อมูล...");
-                return querySnapshot.docs[0].data();
-            }
-
-        } catch (error) {
-            console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
-            // Show a more specific error message if it's a permission issue
-            if (error.code === "permission-denied") {
-                showMessage("ข้อผิดพลาด: ไม่สามารถเข้าถึงฐานข้อมูลได้ โปรดตรวจสอบกฎความปลอดภัยของ Firebase", "error");
-            } else {
-                showMessage("เกิดข้อผิดพลาดในการดึงข้อมูล: " + error.message, "error");
-            }
-            return null;
-        }
-    }
-
-    // --- DOM Elements ---
-    const scanButton = document.getElementById('scanButton');
-    const manualScanButton = document.getElementById('manualScanButton');
-    const serialInput = document.getElementById('serialInput');
-    const cardDisplay = document.getElementById('card-display');
-    const welcomeScreen = document.getElementById('welcome-screen');
-    const cardInfo = document.getElementById('card-info');
-    const messageBox = document.getElementById('message-box');
-
-    // --- UI Utility Functions ---
-    const showMessage = (message, type) => {
-        messageBox.textContent = message;
-        messageBox.className = 'text-center font-semibold mb-4';
-        if (type === 'success') {
-            messageBox.classList.add('text-green-400');
-        } else if (type === 'error') {
-            messageBox.classList.add('text-red-400');
-        }
-    };
-
-    const displayCardData = (data) => {
-        cardInfo.innerHTML = '';
-        cardInfo.innerHTML += `<img src="${data.imageUrl}" alt="${data.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md" />`;
-        cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal text-indigo-300">${data.name}</span></p>`;
-        cardInfo.innerHTML += `<p class="text-sm font-light text-gray-400 italic">${data.description}</p>`;
-        cardInfo.innerHTML += `<p class="text-base mt-2">พลัง: <span class="font-bold text-red-400">${data.power.attack} ATK</span>, <span class="font-bold text-blue-400">${data.power.defense} DEF</span></p>`;
-        cardInfo.innerHTML += `<p class="text-base">ความหายาก: <span class="font-semibold text-yellow-400">${data.rarity}</span></p>`;
-        cardInfo.innerHTML += `<p class="text-xs mt-4 break-all">Token ID: <span class="font-mono text-gray-400">${data.tokenId}</span></p>`;
-    };
-
-    const handleScan = async (serialNumber) => {
-        welcomeScreen.classList.add('hidden');
-        cardDisplay.classList.remove('hidden');
-
-        if (!serialNumber || serialNumber.trim() === '') {
-            showMessage('โปรดกรอกรหัสการ์ดเพื่อทดสอบ', 'error');
-            return;
-        }
-
-        showMessage('กำลังดึงข้อมูล...', 'success');
-        const cardData = await getCardDataBySerialNumber(serialNumber);
-
-        if (cardData) {
-            displayCardData(cardData);
-            showMessage('ดึงข้อมูลสำเร็จ!', 'success');
-        } else {
-            cardInfo.innerHTML = '';
-            showMessage('ไม่พบข้อมูลการ์ดนี้ในฐานข้อมูล', 'error');
-        }
-    };
-
-    // --- Event Listeners ---
-    scanButton.addEventListener('click', async () => {
-        // This part handles the NFC scan if the device supports it
-        if ('NDEFReader' in window) {
-            try {
-                const ndef = new NDEFReader();
-                showMessage('แตะการ์ดที่ด้านหลังอุปกรณ์เพื่อสแกน', 'success');
-                await ndef.scan();
-                ndef.onreading = async event => {
-                    const serialNumber = new TextDecoder().decode(event.serialNumber);
-                    handleScan(serialNumber);
-                };
-            } catch (error) {
-                console.error("Error during NFC scan:", error);
-                showMessage('ไม่สามารถเริ่มการสแกนได้: ' + error.message, 'error');
-            }
-        } else {
-            showMessage('อุปกรณ์นี้ไม่รองรับ Web NFC API', 'error');
-        }
-    });
-
-    manualScanButton.addEventListener('click', () => {
-        const serialNumber = serialInput.value.trim();
-        handleScan(serialNumber);
-    });
-
-    serialInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') {
-            manualScanButton.click();
-        }
-    });
-</script>
-
 </body>
 </html>
