@@ -11,85 +11,183 @@
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
         }
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
     </style>
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
-  authDomain: "cardverse-mvp.firebaseapp.com",
-  projectId: "cardverse-mvp",
-  storageBucket: "cardverse-mvp.firebasestorage.app",
-  messagingSenderId: "787364486859",
-  appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
-  measurementId: "G-WHQ7CV91X0"
-};
+        // **** IMPORTANT **** ใส่โค้ด firebaseConfig ของคุณที่นี่เลยครับ
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
         
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         document.addEventListener('DOMContentLoaded', () => {
-            const cardGrid = document.getElementById('cardGrid');
+            const scanButton = document.getElementById('scanButton');
+            const serialInput = document.getElementById('serialInput');
+            const verifyButton = document.getElementById('verifyButton');
+            const cardDisplay = document.getElementById('cardDisplay');
+            const cardInfo = document.getElementById('cardInfo');
+            const messageBox = document.getElementById('messageBox');
+            const saveButton = document.getElementById('saveButton');
 
-            // Set up a real-time listener to fetch cards from Firestore
-            const cardsRef = collection(db, "cards");
-            const q = query(cardsRef);
-
-            onSnapshot(q, (snapshot) => {
-                const cards = [];
-                snapshot.forEach((doc) => {
-                    cards.push({ id: doc.id, ...doc.data() });
-                });
-                renderCards(cards);
-            }, (error) => {
-                console.error("Error getting documents: ", error);
-                cardGrid.innerHTML = `<p class="text-red-500 font-bold">ไม่สามารถโหลดข้อมูลการ์ดได้: ${error.message}</p>`;
-            });
-
-            const renderCards = (cards) => {
-                cardGrid.innerHTML = '';
-                if (cards.length === 0) {
-                    cardGrid.innerHTML = '<p class="text-gray-500">คุณยังไม่มีการ์ดในระบบ โปรดกลับไปที่หน้า NFC PoC เพื่อเพิ่มการ์ด</p>';
-                } else {
-                    cards.forEach(card => {
-                        const cardElement = document.createElement('div');
-                        cardElement.className = 'bg-white p-6 rounded-xl shadow-md text-left';
-                        cardElement.innerHTML = `
-                            <h3 class="text-xl font-bold text-gray-800">${card.name}</h3>
-                            <p class="text-gray-600 mt-2"><strong>ID:</strong> ${card.id}</p>
-                            <p class="text-gray-600"><strong>รายละเอียด:</strong> ${card.description}</p>
-                            <p class="text-gray-600"><strong>ค่าพลัง:</strong> ${card.power}</p>
-                            <p class="text-gray-600"><strong>ระดับ:</strong> ${card.rarity}</p>
-                            <p class="text-gray-600"><strong>เจ้าของ:</strong> ${card.owner}</p>
-                        `;
-                        cardGrid.appendChild(cardElement);
-                    });
+            // Simulate the NFC data fetch. In a real app, this would be a real NFC read.
+            const mockCardData = {
+                '0x1A2B3C4D': {
+                    name: 'นักรบแห่งรุ่งอรุณ',
+                    description: 'นักรบผู้กล้าหาญที่นำแสงสว่างมาสู่สมรภูมิ',
+                    power: 'ATK: 500, DEF: 400',
+                    rarity: 'Common',
+                    owner: 'user_12345'
+                },
+                '0x5E6F7G8H': {
+                    name: 'จอมเวทย์แห่งจันทรา',
+                    description: 'ผู้ใช้พลังแห่งแสงจันทร์เพื่อทำลายล้างศัตรู',
+                    power: 'ATK: 600, DEF: 350',
+                    rarity: 'Rare',
+                    owner: 'user_12345'
                 }
             };
+
+            const showMessage = (text, type = 'info') => {
+                messageBox.textContent = text;
+                messageBox.className = 'p-4 rounded-xl text-center text-sm font-medium';
+                if (type === 'error') {
+                    messageBox.classList.add('bg-red-100', 'text-red-700');
+                } else if (type === 'success') {
+                    messageBox.classList.add('bg-green-100', 'text-green-700');
+                } else {
+                    messageBox.classList.add('bg-blue-100', 'text-blue-700');
+                }
+                messageBox.classList.remove('hidden');
+            };
+
+            const displayCardData = (data, id) => {
+                cardInfo.innerHTML = '';
+                cardDisplay.classList.remove('hidden');
+                
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal">${data.name}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">รายละเอียด: <span class="font-normal">${data.description}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">ค่าพลัง: <span class="font-normal">${data.power}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">ระดับ: <span class="font-normal">${data.rarity}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">Token ID: <span class="font-normal">${id}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">เจ้าของ: <span class="font-normal">${data.owner}</span></p>`;
+
+                saveButton.dataset.cardId = id;
+                saveButton.classList.remove('hidden');
+            };
+
+            const saveCardToFirestore = async (cardData) => {
+                try {
+                    await setDoc(doc(db, "cards", cardData.id), cardData);
+                    showMessage('บันทึกการ์ดลงในฐานข้อมูลสำเร็จแล้ว!', 'success');
+                } catch (e) {
+                    showMessage(`เกิดข้อผิดพลาดในการบันทึก: ${e.message}`, 'error');
+                    console.error("Error adding document: ", e);
+                }
+            };
+
+            scanButton.addEventListener('click', () => {
+                showMessage('กำลังสแกนการ์ด... กรุณาแตะการ์ดที่ด้านหลังอุปกรณ์', 'info');
+                cardDisplay.classList.add('hidden');
+                saveButton.classList.add('hidden');
+                
+                // Simulate NFC reading process with a delay
+                setTimeout(() => {
+                    const cardId = '0x1A2B3C4D';
+                    const card = mockCardData[cardId];
+                    if (card) {
+                        displayCardData(card, cardId);
+                        showMessage('สแกนสำเร็จ!', 'success');
+                    } else {
+                        showMessage('ไม่พบข้อมูลการ์ดนี้', 'error');
+                    }
+                }, 2000);
+            });
+
+            verifyButton.addEventListener('click', () => {
+                const serial = serialInput.value.trim();
+                if (!serial) {
+                    showMessage('กรุณาใส่รหัสซีเรียล', 'error');
+                    return;
+                }
+
+                showMessage('กำลังยืนยันรหัส...', 'info');
+                cardDisplay.classList.add('hidden');
+                saveButton.classList.add('hidden');
+
+                setTimeout(() => {
+                    const card = mockCardData[serial];
+                    if (card) {
+                        displayCardData(card, serial);
+                        showMessage('ยืนยันรหัสสำเร็จ!', 'success');
+                    } else {
+                        showMessage('ไม่พบการ์ดที่ตรงกับรหัสนี้', 'error');
+                    }
+                }, 1000);
+            });
+
+            saveButton.addEventListener('click', () => {
+                const cardId = saveButton.dataset.cardId;
+                if (cardId) {
+                    const cardDataToSave = {
+                        id: cardId,
+                        ...mockCardData[cardId]
+                    };
+                    saveCardToFirestore(cardDataToSave);
+                }
+            });
         });
     </script>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+<body class="flex items-center justify-center min-h-screen p-4 bg-gray-100">
 
-    <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-4xl text-center space-y-6">
-        <h1 class="text-3xl font-bold text-gray-800">CardVerse: ข้อมูลการ์ดจากฐานข้อมูล</h1>
-        <p class="text-gray-600">การ์ดที่ถูกบันทึกไว้ใน Firebase Firestore จะแสดงที่นี่</p>
-        <div id="cardGrid" class="card-grid">
-            <p class="text-gray-500">กำลังโหลดข้อมูลการ์ด...</p>
+    <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-lg text-center space-y-6">
+        <h1 class="text-3xl font-bold text-gray-800">CardVerse PoC: ทดสอบระบบ</h1>
+        <p class="text-gray-600">แตะการ์ด NFC หรือใส่รหัสซีเรียลเพื่อยืนยันการ์ด</p>
+
+        <!-- The main button to initiate the NFC scan -->
+        <button id="scanButton" class="w-full py-4 px-6 bg-gray-900 text-white font-semibold rounded-xl shadow-lg hover:bg-gray-700 transition-colors">
+            แตะเพื่อสแกนการ์ด
+        </button>
+
+        <div class="flex items-center my-4">
+            <hr class="flex-grow border-gray-300">
+            <span class="px-3 text-gray-500 font-medium">หรือ</span>
+            <hr class="flex-grow border-gray-300">
+        </div>
+
+        <!-- Serial number input and verify button -->
+        <div class="flex flex-col md:flex-row gap-4">
+            <input type="text" id="serialInput" placeholder="กรอกรหัสซีเรียลของการ์ด" class="flex-grow p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            <button id="verifyButton" class="py-3 px-6 bg-gray-600 text-white font-semibold rounded-xl shadow-lg hover:bg-gray-500 transition-colors">
+                ยืนยันรหัส
+            </button>
+        </div>
+
+        <!-- Message box for user feedback (instead of alert) -->
+        <div id="messageBox" class="p-4 rounded-xl text-center text-sm font-medium hidden" role="alert"></div>
+
+        <!-- Display area for the scanned card data -->
+        <div id="cardDisplay" class="hidden p-6 bg-gray-100 rounded-xl text-left border-2 border-dashed border-gray-300 space-y-4">
+            <h2 class="text-xl font-bold text-gray-800">ข้อมูลการ์ดที่ยืนยันได้</h2>
+            <div id="cardInfo" class="space-y-2">
+                <!-- Card information will be displayed here dynamically -->
+            </div>
+            <button id="saveButton" class="w-full py-3 px-6 bg-green-600 text-white font-semibold rounded-xl shadow-lg hover:bg-green-700 transition-colors hidden">
+                บันทึกการ์ด
+            </button>
         </div>
     </div>
-
 </body>
-
 </html>
+```
