@@ -35,6 +35,8 @@ const firebaseConfig = {
 
         document.addEventListener('DOMContentLoaded', () => {
             const scanButton = document.getElementById('scanButton');
+            const serialInput = document.getElementById('serialInput');
+            const verifyButton = document.getElementById('verifyButton');
             const cardDisplay = document.getElementById('cardDisplay');
             const cardInfo = document.getElementById('cardInfo');
             const messageBox = document.getElementById('messageBox');
@@ -42,12 +44,20 @@ const firebaseConfig = {
 
             // Simulate the NFC data fetch. In a real app, this would be a real NFC read.
             const mockCardData = {
-                id: '0x1A2B3C4D', // Use Token ID as a unique ID
-                name: 'นักรบแห่งรุ่งอรุณ',
-                description: 'นักรบผู้กล้าหาญที่นำแสงสว่างมาสู่สมรภูมิ',
-                power: 'ATK: 500, DEF: 400',
-                rarity: 'Common',
-                owner: 'user_12345' // Example user ID
+                '0x1A2B3C4D': {
+                    name: 'นักรบแห่งรุ่งอรุณ',
+                    description: 'นักรบผู้กล้าหาญที่นำแสงสว่างมาสู่สมรภูมิ',
+                    power: 'ATK: 500, DEF: 400',
+                    rarity: 'Common',
+                    owner: 'user_12345'
+                },
+                '0x5E6F7G8H': {
+                    name: 'จอมเวทย์แห่งจันทรา',
+                    description: 'ผู้ใช้พลังแห่งแสงจันทร์เพื่อทำลายล้างศัตรู',
+                    power: 'ATK: 600, DEF: 350',
+                    rarity: 'Rare',
+                    owner: 'user_12345'
+                }
             };
 
             const showMessage = (text, type = 'info') => {
@@ -60,9 +70,10 @@ const firebaseConfig = {
                 } else {
                     messageBox.classList.add('bg-blue-100', 'text-blue-700');
                 }
+                messageBox.classList.remove('hidden');
             };
 
-            const displayCardData = (data) => {
+            const displayCardData = (data, id) => {
                 cardInfo.innerHTML = '';
                 cardDisplay.classList.remove('hidden');
                 
@@ -70,16 +81,15 @@ const firebaseConfig = {
                 cardInfo.innerHTML += `<p class="text-lg font-semibold">รายละเอียด: <span class="font-normal">${data.description}</span></p>`;
                 cardInfo.innerHTML += `<p class="text-lg font-semibold">ค่าพลัง: <span class="font-normal">${data.power}</span></p>`;
                 cardInfo.innerHTML += `<p class="text-lg font-semibold">ระดับ: <span class="font-normal">${data.rarity}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">Token ID: <span class="font-normal">${data.id}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">Token ID: <span class="font-normal">${id}</span></p>`;
                 cardInfo.innerHTML += `<p class="text-lg font-semibold">เจ้าของ: <span class="font-normal">${data.owner}</span></p>`;
 
+                saveButton.dataset.cardId = id;
                 saveButton.classList.remove('hidden');
-                showMessage('สแกนสำเร็จ!', 'success');
             };
 
             const saveCardToFirestore = async (cardData) => {
                 try {
-                    // Save card data to Firestore, using the card's ID as the document ID
                     await setDoc(doc(db, "cards", cardData.id), cardData);
                     showMessage('บันทึกการ์ดลงในฐานข้อมูลสำเร็จแล้ว!', 'success');
                 } catch (e) {
@@ -91,39 +101,87 @@ const firebaseConfig = {
             scanButton.addEventListener('click', () => {
                 showMessage('กำลังสแกนการ์ด... กรุณาแตะการ์ดที่ด้านหลังอุปกรณ์', 'info');
                 cardDisplay.classList.add('hidden');
-                cardInfo.innerHTML = '';
                 saveButton.classList.add('hidden');
                 
                 // Simulate NFC reading process with a delay
                 setTimeout(() => {
-                    displayCardData(mockCardData);
-                }, 2000); // 2-second delay to simulate scanning
+                    const cardId = '0x1A2B3C4D';
+                    const card = mockCardData[cardId];
+                    if (card) {
+                        displayCardData(card, cardId);
+                        showMessage('สแกนสำเร็จ!', 'success');
+                    } else {
+                        showMessage('ไม่พบข้อมูลการ์ดนี้', 'error');
+                    }
+                }, 2000);
+            });
+
+            verifyButton.addEventListener('click', () => {
+                const serial = serialInput.value.trim();
+                if (!serial) {
+                    showMessage('กรุณาใส่รหัสซีเรียล', 'error');
+                    return;
+                }
+
+                showMessage('กำลังยืนยันรหัส...', 'info');
+                cardDisplay.classList.add('hidden');
+                saveButton.classList.add('hidden');
+
+                setTimeout(() => {
+                    const card = mockCardData[serial];
+                    if (card) {
+                        displayCardData(card, serial);
+                        showMessage('ยืนยันรหัสสำเร็จ!', 'success');
+                    } else {
+                        showMessage('ไม่พบการ์ดที่ตรงกับรหัสนี้', 'error');
+                    }
+                }, 1000);
             });
 
             saveButton.addEventListener('click', () => {
-                // Pass the mock data to the save function
-                saveCardToFirestore(mockCardData);
+                const cardId = saveButton.dataset.cardId;
+                if (cardId) {
+                    const cardDataToSave = {
+                        id: cardId,
+                        ...mockCardData[cardId]
+                    };
+                    saveCardToFirestore(cardDataToSave);
+                }
             });
         });
     </script>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4 bg-gray-100">
 
     <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-lg text-center space-y-6">
-        <h1 class="text-3xl font-bold text-gray-800">CardVerse PoC: ทดสอบระบบ NFC</h1>
-        <p class="text-gray-600">กดปุ่มด้านล่างเพื่อเริ่มสแกนการ์ดจริงด้วยชิป NFC</p>
+        <h1 class="text-3xl font-bold text-gray-800">CardVerse PoC: ทดสอบระบบ</h1>
+        <p class="text-gray-600">แตะการ์ด NFC หรือใส่รหัสซีเรียลเพื่อยืนยันการ์ด</p>
 
         <!-- The main button to initiate the NFC scan -->
         <button id="scanButton" class="w-full py-4 px-6 bg-gray-900 text-white font-semibold rounded-xl shadow-lg hover:bg-gray-700 transition-colors">
             แตะเพื่อสแกนการ์ด
         </button>
 
+        <div class="flex items-center my-4">
+            <hr class="flex-grow border-gray-300">
+            <span class="px-3 text-gray-500 font-medium">หรือ</span>
+            <hr class="flex-grow border-gray-300">
+        </div>
+
+        <!-- Serial number input and verify button -->
+        <div class="flex flex-col md:flex-row gap-4">
+            <input type="text" id="serialInput" placeholder="กรอกรหัสซีเรียลของการ์ด" class="flex-grow p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            <button id="verifyButton" class="py-3 px-6 bg-gray-600 text-white font-semibold rounded-xl shadow-lg hover:bg-gray-500 transition-colors">
+                ยืนยันรหัส
+            </button>
+        </div>
+
         <!-- Message box for user feedback (instead of alert) -->
         <div id="messageBox" class="p-4 rounded-xl text-center text-sm font-medium hidden" role="alert"></div>
 
         <!-- Display area for the scanned card data -->
         <div id="cardDisplay" class="hidden p-6 bg-gray-100 rounded-xl text-left border-2 border-dashed border-gray-300 space-y-4">
-            <h2 class="text-xl font-bold text-gray-800">ข้อมูลการ์ดที่สแกนได้</h2>
+            <h2 class="text-xl font-bold text-gray-800">ข้อมูลการ์ดที่ยืนยันได้</h2>
             <div id="cardInfo" class="space-y-2">
                 <!-- Card information will be displayed here dynamically -->
             </div>
@@ -132,7 +190,5 @@ const firebaseConfig = {
             </button>
         </div>
     </div>
-
 </body>
 </html>
-```
