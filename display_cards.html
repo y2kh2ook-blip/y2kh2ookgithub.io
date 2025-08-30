@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardVerse NFC PoC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+    </style>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        // **** IMPORTANT **** ใส่โค้ด firebaseConfig ของคุณที่นี่เลยครับ
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardGrid = document.getElementById('cardGrid');
+
+            // Set up a real-time listener to fetch cards from Firestore
+            const cardsRef = collection(db, "cards");
+            const q = query(cardsRef);
+
+            onSnapshot(q, (snapshot) => {
+                const cards = [];
+                snapshot.forEach((doc) => {
+                    cards.push({ id: doc.id, ...doc.data() });
+                });
+                renderCards(cards);
+            }, (error) => {
+                console.error("Error getting documents: ", error);
+                cardGrid.innerHTML = `<p class="text-red-500 font-bold">ไม่สามารถโหลดข้อมูลการ์ดได้: ${error.message}</p>`;
+            });
+
+            const renderCards = (cards) => {
+                cardGrid.innerHTML = '';
+                if (cards.length === 0) {
+                    cardGrid.innerHTML = '<p class="text-gray-500">คุณยังไม่มีการ์ดในระบบ โปรดกลับไปที่หน้า NFC PoC เพื่อเพิ่มการ์ด</p>';
+                } else {
+                    cards.forEach(card => {
+                        const cardElement = document.createElement('div');
+                        cardElement.className = 'bg-white p-6 rounded-xl shadow-md text-left';
+                        cardElement.innerHTML = `
+                            <h3 class="text-xl font-bold text-gray-800">${card.name}</h3>
+                            <p class="text-gray-600 mt-2"><strong>ID:</strong> ${card.id}</p>
+                            <p class="text-gray-600"><strong>รายละเอียด:</strong> ${card.description}</p>
+                            <p class="text-gray-600"><strong>ค่าพลัง:</strong> ${card.power}</p>
+                            <p class="text-gray-600"><strong>ระดับ:</strong> ${card.rarity}</p>
+                            <p class="text-gray-600"><strong>เจ้าของ:</strong> ${card.owner}</p>
+                        `;
+                        cardGrid.appendChild(cardElement);
+                    });
+                }
+            };
+        });
+    </script>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+
+    <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-4xl text-center space-y-6">
+        <h1 class="text-3xl font-bold text-gray-800">CardVerse: ข้อมูลการ์ดจากฐานข้อมูล</h1>
+        <p class="text-gray-600">การ์ดที่ถูกบันทึกไว้ใน Firebase Firestore จะแสดงที่นี่</p>
+        <div id="cardGrid" class="card-grid">
+            <p class="text-gray-500">กำลังโหลดข้อมูลการ์ด...</p>
+        </div>
+    </div>
+
+</body>
+</html>
