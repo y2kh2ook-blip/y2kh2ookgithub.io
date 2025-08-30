@@ -57,37 +57,58 @@
 <script type="module">
     // --- Firebase SDKs ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- Firebase Configuration ---
-    // IMPORTANT: Replace the placeholders below with your actual Firebase project config.
-    // ข้อมูลการเชื่อมต่อ Firebase ของคุณ (นำมาจาก Project settings ใน Firebase Console)
     const firebaseConfig = {
-  apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
-  authDomain: "cardverse-mvp.firebaseapp.com",
-  projectId: "cardverse-mvp",
-  storageBucket: "cardverse-mvp.firebasestorage.app",
-  messagingSenderId: "787364486859",
-  appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
-  measurementId: "G-WHQ7CV91X0"
-};
+        apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
+        authDomain: "cardverse-mvp.firebaseapp.com",
+        projectId: "cardverse-mvp",
+        storageBucket: "cardverse-mvp.firebasestorage.app",
+        messagingSenderId: "787364486859",
+        appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
+        measurementId: "G-WHQ7CV91X0"
+    };
 
-    // Initialize Firebase
-    // เริ่มต้นใช้งาน Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    let app, db;
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        console.log("Firebase initialized successfully.");
-    } catch (e) {
-        console.error("Error initializing Firebase:", e);
-        showMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ Firebase โปรดตรวจสอบโค้ด Config ของคุณ", "error");
-    }
+    // --- Global variables provided by the platform ---
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    // --- Firebase Initialization and Auth ---
+    let app, db, auth;
+    let userId;
+
+    const showMessage = (message, type) => {
+        const messageBox = document.getElementById('message-box');
+        messageBox.textContent = message;
+        messageBox.className = 'text-center font-semibold mb-4';
+        if (type === 'success') {
+            messageBox.classList.add('text-green-400');
+        } else if (type === 'error') {
+            messageBox.classList.add('text-red-400');
+        }
+    };
+    
+    // Initialize Firebase services on window load
+    window.onload = async () => {
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            console.log("Firebase initialized successfully.");
+
+            // Sign in anonymously to get a userId
+            const userCredential = await signInAnonymously(auth);
+            userId = userCredential.user.uid;
+            console.log("Signed in anonymously with userId:", userId);
+
+        } catch (e) {
+            console.error("Error initializing Firebase or signing in:", e);
+            showMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ Firebase โปรดตรวจสอบโค้ด Config ของคุณ", "error");
+        }
+    };
 
     // --- Firebase Data Fetching Function ---
-    // ฟังก์ชันสำหรับดึงข้อมูลการ์ดจาก Firestore
     async function getCardDataBySerialNumber(serialNumber) {
         if (!db) {
             console.error("Firestore database not initialized.");
@@ -95,13 +116,19 @@
             return null;
         }
 
+        if (!userId) {
+            console.error("Authentication failed, no userId available.");
+            showMessage("ไม่สามารถระบุตัวตนผู้ใช้ได้", "error");
+            return null;
+        }
+
         try {
-            const cardsRef = collection(db, 'cards');
+            // Corrected Firestore path to match security rules
+            const cardsRef = collection(db, `artifacts/${appId}/users/${userId}/cards`);
             const q = query(cardsRef, where('serialNumber', '==', serialNumber));
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
-                console.log("ไม่พบการ์ดที่ตรงกัน.");
                 console.log(`ไม่พบการ์ดที่ตรงกับ serial number: ${serialNumber}`);
                 return null;
             } else {
@@ -111,9 +138,8 @@
 
         } catch (error) {
             console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
-            // Show a more specific error message if it's a permission issue
             if (error.code === "permission-denied") {
-                showMessage("ข้อผิดพลาด: ไม่สามารถเข้าถึงฐานข้อมูลได้ โปรดตรวจสอบกฎความปลอดภัยของ Firebase", "error");
+                showMessage("ข้อผิดพลาด: สิทธิ์การเข้าถึงฐานข้อมูลถูกปฏิเสธ", "error");
             } else {
                 showMessage("เกิดข้อผิดพลาดในการดึงข้อมูล: " + error.message, "error");
             }
@@ -128,18 +154,6 @@
     const cardDisplay = document.getElementById('card-display');
     const welcomeScreen = document.getElementById('welcome-screen');
     const cardInfo = document.getElementById('card-info');
-    const messageBox = document.getElementById('message-box');
-
-    // --- UI Utility Functions ---
-    const showMessage = (message, type) => {
-        messageBox.textContent = message;
-        messageBox.className = 'text-center font-semibold mb-4';
-        if (type === 'success') {
-            messageBox.classList.add('text-green-400');
-        } else if (type === 'error') {
-            messageBox.classList.add('text-red-400');
-        }
-    };
 
     const displayCardData = (data) => {
         cardInfo.innerHTML = '';
@@ -174,7 +188,6 @@
 
     // --- Event Listeners ---
     scanButton.addEventListener('click', async () => {
-        // This part handles the NFC scan if the device supports it
         if ('NDEFReader' in window) {
             try {
                 const ndef = new NDEFReader();
@@ -204,6 +217,5 @@
         }
     });
 </script>
-
 </body>
 </html>
