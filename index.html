@@ -6,45 +6,36 @@
     <title>CardVerse MVP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a2e;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #121212;
+            color: #E2E2E2;
         }
-        .container {
-            max-width: 600px;
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .error-message {
+            color: #EF4444;
+            font-weight: bold;
+            margin-top: 1rem;
+            text-align: center;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
 
-<div class="container mx-auto p-8 bg-gray-800 rounded-3xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-6 text-indigo-400">CardVerse MVP</h1>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // ตรวจสอบให้แน่ใจว่า import SDKs ทั้งหมดที่จำเป็น
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-    <div id="loading-screen" class="flex flex-col items-center">
-        <p class="text-center text-lg mb-8" id="loading-message">
-            กำลังเตรียมข้อมูล...
-        </p>
-    </div>
-
-    <div id="card-display" class="hidden flex flex-col items-center p-6 bg-gray-700 rounded-2xl shadow-inner mt-8">
-        <p id="message-box" class="text-center font-semibold mb-4 text-green-400"></p>
-        <div id="card-info" class="flex flex-col items-center text-center">
-            <!-- ข้อมูลการ์ดจะแสดงที่นี่ -->
-        </div>
-        <button onclick="window.location.reload()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full mt-6 transition duration-300">
-            สร้างการ์ดใหม่
-        </button>
-    </div>
-</div>
-
-<script type="module">
-    // --- Firebase SDKs ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    
-    // Your web app's Firebase configuration
+        // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
@@ -55,79 +46,104 @@ const firebaseConfig = {
   appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
   measurementId: "G-WHQ7CV91X0"
 };
+        
+        // Initializing Firebase App
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // -- Page Logic --
+        const loginPage = document.getElementById('login-page');
+        const homePage = document.getElementById('home-page');
+        const errorMessage = document.getElementById('error-message');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const logoutBtn = document.getElementById('logout-btn');
 
-    let db, auth;
-    let userId;
+        const showPage = (pageToShow) => {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            pageToShow.classList.add('active');
+        };
 
-    const loadingScreen = document.getElementById('loading-screen');
-    const cardDisplay = document.getElementById('card-display');
-    const cardInfo = document.getElementById('card-info');
-    const loadingMessage = document.getElementById('loading-message');
-    const messageBox = document.getElementById('message-box');
+        const showLoginError = (message) => {
+            // ดึงข้อความ error ที่ชัดเจนขึ้น
+            let displayMessage = message;
+            if (message.includes('auth/configuration-not-found')) {
+                displayMessage = 'เกิดข้อผิดพลาด: ไม่พบการตั้งค่า Firebase กรุณาตรวจสอบโค้ด';
+            } else if (message.includes('auth/invalid-email')) {
+                displayMessage = 'อีเมลไม่ถูกต้อง';
+            } else if (message.includes('auth/wrong-password')) {
+                displayMessage = 'รหัสผ่านไม่ถูกต้อง';
+            }
+            errorMessage.textContent = displayMessage;
+        };
+        
+        // -- Button Event Listeners --
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            errorMessage.textContent = '';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showPage(homePage);
+            } catch (error) {
+                showLoginError(error.message);
+            }
+        });
 
-    const showMessage = (message, type, element = messageBox) => {
-        element.textContent = message;
-        element.className = 'text-center font-semibold mb-4';
-        if (type === 'success') {
-            element.classList.add('text-green-400');
-        } else if (type === 'error') {
-            element.classList.add('text-red-400');
-        }
-    };
+        registerBtn.addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            errorMessage.textContent = '';
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showPage(homePage);
+            } catch (error) {
+                showLoginError(error.message);
+            }
+        });
 
-    const displayCardData = (data) => {
-        cardInfo.innerHTML = '';
-        cardInfo.innerHTML += `<img src="${data.imageUrl}" alt="${data.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md" />`;
-        cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal text-indigo-300">${data.name}</span></p>`;
-        cardInfo.innerHTML += `<p class="text-sm font-light text-gray-400 italic">${data.description}</p>`;
-        cardInfo.innerHTML += `<p class="text-base mt-2">พลัง: <span class="font-bold text-red-400">${data.power.attack} ATK</span>, <span class="font-bold text-blue-400">${data.power.defense} DEF</span></p>`;
-        cardInfo.innerHTML += `<p class="text-base">ความหายาก: <span class="font-semibold text-yellow-400">${data.rarity}</span></p>`;
-        cardInfo.innerHTML += `<p class="text-xs mt-4 break-all">Serial Number: <span class="font-mono text-gray-400">${data.serialNumber}</span></p>`;
-    };
-    
-    window.onload = async () => {
-        try {
-            loadingMessage.textContent = "กำลังเชื่อมต่อ Firebase...";
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            
-            loadingMessage.textContent = "กำลังยืนยันตัวตนผู้ใช้...";
-            const userCredential = await signInAnonymously(auth);
-            userId = userCredential.user.uid;
+        logoutBtn.addEventListener('click', async () => {
+            await auth.signOut();
+            showPage(loginPage);
+        });
+        
+        // Initial page load
+        showPage(loginPage);
+    </script>
 
-            const cardId = crypto.randomUUID(); // สร้าง ID การ์ดที่ไม่ซ้ำกันในแต่ละครั้ง
-            const cardData = {
-                serialNumber: 'demo-card-' + Math.floor(Math.random() * 10000),
-                name: 'การ์ดกบแห่งป่าต้องมนตร์',
-                description: 'กบโบราณที่อาศัยอยู่ในป่าที่ไม่มีใครเคยไปถึง และมีพลังเวทมนตร์อันยิ่งใหญ่',
-                imageUrl: 'https://images.unsplash.com/photo-1510107297920-f56f2f9f5b61?auto=format&fit=crop&q=80&w=1770&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                power: { attack: 25, defense: 30 },
-                rarity: 'rare'
-            };
+    <!-- Login Page -->
+    <div id="login-page" class="page active login-page w-full flex flex-col items-center justify-center p-4">
+        <div class="cardverse-logo text-center mb-6">
+            <svg class="h-16 w-16 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            <h1 class="text-3xl font-bold mt-4">CardVerse MVP</h1>
+            <p class="text-sm text-gray-400">Phygital Game Card</p>
+        </div>
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-sm">
+            <div class="mb-4">
+                <label for="login-email" class="block text-sm font-medium text-gray-400">อีเมล</label>
+                <input type="email" id="login-email" placeholder="email@example.com" class="mt-1 p-2 w-full bg-gray-700 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-6">
+                <label for="login-password" class="block text-sm font-medium text-gray-400">รหัสผ่าน</label>
+                <input type="password" id="login-password" placeholder="รหัสผ่าน" class="mt-1 p-2 w-full bg-gray-700 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <p id="error-message" class="error-message text-center"></p>
+            <div class="flex space-x-4">
+                <button id="login-btn" class="flex-1 py-2 px-4 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">เข้าสู่ระบบ</button>
+                <button id="register-btn" class="flex-1 py-2 px-4 rounded-md bg-gray-600 text-white font-semibold hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">สมัครสมาชิก</button>
+            </div>
+        </div>
+    </div>
 
-            loadingMessage.textContent = "กำลังสร้างและบันทึกข้อมูลการ์ดใหม่...";
-            const cardDocRef = doc(db, `artifacts/${appId}/users/${userId}/cards/${cardId}`);
-            await setDoc(cardDocRef, cardData);
-            
-            loadingMessage.textContent = "สร้างการ์ดและบันทึกสำเร็จ!";
+    <!-- Home Page -->
+    <div id="home-page" class="page home-page w-full flex flex-col items-center justify-center p-4">
+        <h1 class="text-3xl font-bold mt-4">ยินดีต้อนรับสู่ CardVerse</h1>
+        <p class="text-lg text-gray-400 mt-2">คุณเข้าสู่ระบบสำเร็จแล้ว</p>
+        <button id="logout-btn" class="mt-8 py-2 px-4 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">ออกจากระบบ</button>
+    </div>
 
-            // แสดงการ์ดที่เพิ่งสร้างขึ้นมา
-            loadingScreen.classList.add('hidden');
-            cardDisplay.classList.remove('hidden');
-            displayCardData(cardData);
-            showMessage("ข้อมูลถูกบันทึกใน Firebase แล้ว!", "success");
-
-        } catch (e) {
-            console.error("Initialization or data creation failed:", e);
-            loadingScreen.classList.add('hidden');
-            cardDisplay.classList.remove('hidden');
-            cardInfo.innerHTML = '';
-            showMessage("เกิดข้อผิดพลาด: " + e.message, "error");
-        }
-    };
-</script>
 </body>
 </html>
+```eof
