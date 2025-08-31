@@ -1,104 +1,158 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardVerse NFC PoC</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CardVerse Viewer</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-        }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f0f2f5; }
+        .container { max-width: 600px; width: 100%; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .controls input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px; }
+        .controls button { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; }
+        #nfc-scan-btn { background-color: #28a745; }
+        #manual-lookup-btn { background-color: #007bff; }
+        #status-message { color: #dc3545; margin-top: 10px; }
+        .card-display { text-align: center; }
+        .card-display img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px; }
+        .card-details h2 { margin: 0 0 10px; color: #333; }
+        .card-details p { margin: 5px 0; color: #666; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body>
+    <div class="container">
+        <h1>CardVerse Viewer</h1>
+        <div class="controls">
+            <button id="nfc-scan-btn">สแกนการ์ด NFC</button>
+            <input type="text" id="serial-input" placeholder="หรือกรอกรหัสซีเรียล">
+            <button id="manual-lookup-btn">ค้นหา</button>
+        </div>
+        <p id="status-message"></p>
 
-    <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-lg text-center space-y-6">
-        <h1 class="text-3xl font-bold text-gray-800">CardVerse PoC: ทดสอบระบบ NFC</h1>
-        <p class="text-gray-600">กดปุ่มด้านล่างเพื่อเริ่มสแกนการ์ดจริงด้วยชิป NFC</p>
+        <hr>
 
-        <!-- The main button to initiate the NFC scan -->
-        <button id="scanButton" class="w-full py-4 px-6 bg-gray-900 text-white font-semibold rounded-xl shadow-lg hover:bg-gray-700 transition-colors">
-            แตะเพื่อสแกนการ์ด
-        </button>
-
-        <!-- Message box for user feedback (instead of alert) -->
-        <div id="messageBox" class="hidden p-4 rounded-xl text-center text-sm font-medium" role="alert"></div>
-
-        <!-- Display area for the scanned card data -->
-        <div id="cardDisplay" class="hidden p-6 bg-gray-100 rounded-xl text-left border-2 border-dashed border-gray-300">
-            <h2 class="text-xl font-bold text-gray-800 mb-2">ข้อมูลการ์ดที่สแกนได้</h2>
-            <div id="cardInfo" class="space-y-2">
-                <!-- Card information will be displayed here dynamically -->
+        <div id="card-display" class="card-display">
+            <img id="card-image" src="" alt="Card Image">
+            <div id="card-details">
+                <h2 id="card-name"></h2>
+                <p id="card-rarity"></p>
+                <p id="card-description"></p>
+                <p><strong>Attack:</strong> <span id="card-attack"></span></p>
+                <p><strong>Defense:</strong> <span id="card-defense"></span></p>
+                <p><strong>Cost:</strong> <span id="card-cost"></span></p>
             </div>
         </div>
     </div>
-
+    
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scanButton = document.getElementById('scanButton');
-            const cardDisplay = document.getElementById('cardDisplay');
-            const cardInfo = document.getElementById('cardInfo');
-            const messageBox = document.getElementById('messageBox');
+        // Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
+  authDomain: "cardverse-mvp.firebaseapp.com",
+  projectId: "cardverse-mvp",
+  storageBucket: "cardverse-mvp.firebasestorage.app",
+  messagingSenderId: "787364486859",
+  appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
+  measurementId: "G-WHQ7CV91X0"
+};
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-            // Simulate the NFC data fetch. In a real app, this would be a real NFC read.
-            // จำลองข้อมูลการ์ดที่ได้จากการสแกน NFC
-            const mockCardData = {
-                name: 'นักรบแห่งรุ่งอรุณ',
-                description: 'นักรบผู้กล้าหาญที่นำแสงสว่างมาสู่สมรภูมิ',
-                power: 'ATK: 500, DEF: 400',
-                rarity: 'Common',
-                tokenId: '0x1A2B3C4D'
-            };
+        //--- DOM Elements ---
+        const nfcScanBtn = document.getElementById('nfc-scan-btn');
+        const serialInput = document.getElementById('serial-input');
+        const manualLookupBtn = document.getElementById('manual-lookup-btn');
+        const statusMessage = document.getElementById('status-message');
+        const cardDisplay = document.getElementById('card-display');
+        const cardImage = document.getElementById('card-image');
+        const cardName = document.getElementById('card-name');
+        const cardRarity = document.getElementById('card-rarity');
+        const cardDescription = document.getElementById('card-description');
+        const cardAttack = document.getElementById('card-attack');
+        const cardDefense = document.getElementById('card-defense');
+        const cardCost = document.getElementById('card-cost');
 
-            const showMessage = (text, type = 'info') => {
-                messageBox.textContent = text;
-                messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
-                if (type === 'error') {
-                    messageBox.classList.add('bg-red-100', 'text-red-700');
-                } else if (type === 'success') {
-                    messageBox.classList.add('bg-green-100', 'text-green-700');
-                } else {
-                    messageBox.classList.add('bg-blue-100', 'text-blue-700');
+        //--- Main Functions ---
+
+        // ฟังก์ชันสำหรับดึงข้อมูลการ์ดจาก Firebase
+        function getCardData(serialNumber) {
+            statusMessage.innerText = 'กำลังค้นหาข้อมูลการ์ด...';
+            db.collection("cards").where("serial_number", "==", serialNumber).get()
+                .then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        const doc = querySnapshot.docs[0];
+                        const cardData = doc.data();
+                        
+                        cardImage.src = cardData.image_url;
+                        cardImage.alt = cardData.name;
+                        cardName.innerText = cardData.name;
+                        cardRarity.innerText = `ระดับ: ${cardData.rarity}`;
+                        cardDescription.innerText = cardData.description;
+                        
+                        if (cardData.stats) {
+                            cardAttack.innerText = cardData.stats.attack;
+                            cardDefense.innerText = cardData.stats.defense;
+                            cardCost.innerText = cardData.stats.cost;
+                        }
+                        
+                        statusMessage.innerText = '';
+                    } else {
+                        statusMessage.innerText = `ไม่พบข้อมูลการ์ดสำหรับ serial number: ${serialNumber}`;
+                        clearCardDisplay();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error getting document:", error);
+                    statusMessage.innerText = 'เกิดข้อผิดพลาดในการดึงข้อมูล';
+                    clearCardDisplay();
+                });
+        }
+        
+        function clearCardDisplay() {
+            cardImage.src = "";
+            cardImage.alt = "Card Image";
+            cardName.innerText = "";
+            cardRarity.innerText = "";
+            cardDescription.innerText = "";
+            cardAttack.innerText = "";
+            cardDefense.innerText = "";
+            cardCost.innerText = "";
+        }
+        
+        //--- Event Listeners ---
+
+        nfcScanBtn.addEventListener('click', async () => {
+            if ('NDEFReader' in window) {
+                try {
+                    statusMessage.innerText = 'แตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
+                    const reader = new NDEFReader();
+                    await reader.scan();
+
+                    reader.addEventListener("reading", ({ message, serialNumber }) => {
+                        statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
+                        getCardData(serialNumber);
+                    });
+                } catch (error) {
+                    statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC';
+                    console.error("NFC Scan Error:", error);
                 }
-            };
+            } else {
+                statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
+            }
+        });
 
-            scanButton.addEventListener('click', () => {
-                showMessage('กำลังสแกนการ์ด... กรุณาแตะการ์ดที่ด้านหลังอุปกรณ์', 'info');
-                cardDisplay.classList.add('hidden');
-                cardInfo.innerHTML = '';
-
-                // Simulate NFC reading process with a delay
-                // จำลองกระบวนการสแกน NFC ด้วยการหน่วงเวลา 2 วินาที
-                setTimeout(() => {
-                    // Check if NFC is supported in a real application
-                    // ในแอปพลิเคชันจริงจะมีการตรวจสอบว่าอุปกรณ์รองรับ NFC หรือไม่
-                    // if ('NDEFReader' in window) { ... } else { ... }
-
-                    // Assuming a successful scan, display the data
-                    // เมื่อสแกนสำเร็จ ก็จะแสดงข้อมูล
-                    displayCardData(mockCardData);
-                    showMessage('สแกนสำเร็จ!', 'success');
-                }, 2000); // 2-second delay to simulate scanning
-            });
-
-            const displayCardData = (data) => {
-                // Clear any previous data
-                cardInfo.innerHTML = '';
-                
-                // Show the main display area
-                cardDisplay.classList.remove('hidden');
-                
-                // Add card data dynamically
-                // เพิ่มข้อมูลการ์ดแบบไดนามิก
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal">${data.name}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">รายละเอียด: <span class="font-normal">${data.description}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ค่าพลัง: <span class="font-normal">${data.power}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ระดับ: <span class="font-normal">${data.rarity}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">สถานะการเป็นเจ้าของ (Token ID): <span class="font-normal">${data.tokenId}</span></p>`;
-            };
+        manualLookupBtn.addEventListener('click', () => {
+            const serialNumber = serialInput.value.trim();
+            if (serialNumber) {
+                getCardData(serialNumber);
+            } else {
+                statusMessage.innerText = 'กรุณากรอกรหัสซีเรียล';
+            }
         });
     </script>
 </body>
