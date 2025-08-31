@@ -5,19 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CardVerse Viewer</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f0f2f5; }
-        .container { max-width: 600px; width: 100%; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .controls input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px; }
-        .controls button { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; }
-        #nfc-scan-btn { background-color: #28a745; }
-        #manual-lookup-btn { background-color: #007bff; }
-        #status-message { color: #dc3545; margin-top: 10px; }
-        .card-display { text-align: center; }
-        .card-display img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px; }
-        .card-details h2 { margin: 0 0 10px; color: #333; }
-        .card-details p { margin: 5px 0; color: #666; }
-    </style>
+    /* General Styles */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        /* เปลี่ยนสีพื้นหลังเป็นม่วงเข้ม */
+        background-color: #1a1523;
+        color: #e0e0e0;
+    }
+    .container {
+        max-width: 600px;
+        width: 100%;
+        /* เปลี่ยนสีพื้นหลังเป็นม่วงอ่อน */
+        background: #3a2e48;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+        /* เปลี่ยนสีข้อความเป็นสีทอง */
+        color: #ffd700;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    hr {
+        border: 0;
+        height: 1px;
+        /* เปลี่ยนเส้นคั่นเป็นสีทองอ่อน */
+        background: #a98d36;
+        margin: 20px 0;
+    }
+
+    /* Controls Section */
+    .controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .controls input {
+        flex-grow: 1;
+        padding: 12px;
+        border: 1px solid #5a4b6b;
+        border-radius: 8px;
+        font-size: 16px;
+        background-color: #2e2637;
+        color: #e0e0e0;
+    }
+    .controls button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+    #nfc-scan-btn { 
+        /* เปลี่ยนสีปุ่มเป็นสีม่วงเข้มและทอง */
+        background-color: #7d4496; 
+    }
+    #nfc-scan-btn:hover { 
+        background-color: #6a3c80; 
+    }
+    #manual-lookup-btn { 
+        background-color: #b08d00; 
+    }
+    #manual-lookup-btn:hover { 
+        background-color: #8f7200; 
+    }
+    #status-message { 
+        /* เปลี่ยนสีข้อความสถานะเป็นสีแดงทอง */
+        color: #ff6347; 
+        margin-top: 10px; 
+        text-align: center; 
+    }
+
+    /* Card Display Section */
+    .card-display {
+        text-align: center;
+        padding: 15px;
+    }
+    .card-display img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        margin-bottom: 20px;
+    }
+    .card-details h2 {
+        margin: 0 0 5px;
+        font-size: 2em;
+        /* เปลี่ยนสีข้อความเป็นสีทอง */
+        color: #ffd700;
+    }
+    .card-details p {
+        margin: 5px 0;
+        font-size: 1.1em;
+        color: #e0e0e0;
+    }
+</style>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
 </head>
