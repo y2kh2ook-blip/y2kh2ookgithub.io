@@ -126,34 +126,45 @@ const firebaseConfig = {
         
         //--- Event Listeners ---
 
-        nfcScanBtn.addEventListener('click', async () => {
-            if ('NDEFReader' in window) {
-                try {
-                    statusMessage.innerText = 'แตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
-                    const reader = new NDEFReader();
-                    await reader.scan();
+        // Listener สำหรับการสแกน NFC โดยอัตโนมัติ
+async function autoScanNFC() {
+    if ('NDEFReader' in window) {
+        try {
+            statusMessage.innerText = 'โปรดแตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
+            const reader = new NDEFReader();
+            
+            // เริ่มการสแกนทันทีที่หน้าเว็บโหลด
+            await reader.scan();
 
-                    reader.addEventListener("reading", ({ message, serialNumber }) => {
-                        statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
-                        getCardData(serialNumber);
-                    });
-                } catch (error) {
-                    statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC';
-                    console.error("NFC Scan Error:", error);
-                }
-            } else {
-                statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
-            }
-        });
-
-        manualLookupBtn.addEventListener('click', () => {
-            const serialNumber = serialInput.value.trim();
-            if (serialNumber) {
+            reader.addEventListener("reading", ({ serialNumber }) => {
+                statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
+                console.log(`Serial Number: ${serialNumber}`);
                 getCardData(serialNumber);
-            } else {
-                statusMessage.innerText = 'กรุณากรอกรหัสซีเรียล';
-            }
-        });
+            });
+            
+        } catch (error) {
+            statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC: กรุณาโหลดหน้าเว็บใหม่อีกครั้ง';
+            console.error("NFC Scan Error:", error);
+        }
+    } else {
+        statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
+    }
+}
+
+// เรียกใช้ฟังก์ชันสแกนอัตโนมัติทันทีเมื่อหน้าเว็บโหลดเสร็จ
+window.addEventListener('DOMContentLoaded', (event) => {
+    autoScanNFC();
+});
+
+// Listener สำหรับปุ่มค้นหาด้วยรหัส (ยังคงใช้งานได้)
+manualLookupBtn.addEventListener('click', () => {
+    const serialNumber = serialInput.value.trim();
+    if (serialNumber) {
+        getCardData(serialNumber);
+    } else {
+        statusMessage.innerText = 'กรุณากรอกรหัสซีเรียล';
+    }
+});
     </script>
 </body>
 </html>
