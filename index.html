@@ -91,22 +91,27 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
+                // onAuthStateChanged จะเฝ้าฟังสถานะการล็อกอินและทำงานเมื่อล็อกอินสำเร็จ
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         const userId = user.uid;
                         userIdDisplay.textContent = userId;
                         console.log(`Signed in with user ID: ${userId}`);
-                        // Start listening to the 'cards' collection once authenticated
+                        // เมื่อล็อกอินสำเร็จ จึงจะเรียกฟังก์ชันสำหรับดึงข้อมูลการ์ด
                         listenForCards();
                     } else {
                         console.log("No user is signed in.");
                         userIdDisplay.textContent = "ไม่ได้ลงชื่อเข้าใช้";
+                        // หากไม่มีผู้ใช้ ให้ลองล็อกอินแบบกำหนดเองหรือแบบไม่ระบุชื่อ
+                        if (initialAuthToken) {
+                            signInWithCustomToken(auth, initialAuthToken).catch(error => {
+                                console.error("Error signing in with custom token:", error);
+                            });
+                        } else {
+                            signInAnonymously(auth).catch(error => {
+                                console.error("Error signing in anonymously:", error);
+                            });
+                        }
                     }
                 });
             } catch (error) {
@@ -152,7 +157,13 @@
             showMessage('กำลังค้นหาข้อมูลการ์ด...', 'info');
             
             try {
-                const userId = auth.currentUser.uid;
+                // ตรวจสอบว่าผู้ใช้ล็อกอินสำเร็จแล้วก่อนเรียกใช้ currentUser
+                const userId = auth.currentUser?.uid;
+                if (!userId) {
+                    showMessage('กำลังเข้าสู่ระบบ กรุณาลองอีกครั้งในไม่ช้า', 'info');
+                    return;
+                }
+                
                 const cardDocRef = doc(db, `/artifacts/${appId}/users/${userId}/cards`, serialNumber);
                 const docSnap = await getDoc(cardDocRef);
 
@@ -177,8 +188,7 @@
         scanButton.addEventListener('click', () => {
             showMessage('กำลังจำลองการสแกนการ์ด...', 'info');
             setTimeout(() => {
-                // ตัวอย่างรหัสซีเรียลจาก NFC Tag
-                const mockSerial = 'NFC-123XYZ'; 
+                const mockSerial = 'NFC-123XYZ';
                 serialInput.value = mockSerial;
                 verifyCard(mockSerial);
             }, 1000);
