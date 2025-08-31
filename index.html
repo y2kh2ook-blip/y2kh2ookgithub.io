@@ -13,6 +13,9 @@
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
         }
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-6 flex justify-center items-start min-h-screen">
@@ -73,7 +76,7 @@
 
         let app, auth, db;
         const userIdDisplay = document.getElementById('user-id');
-        const inputSection = document.getElementById('input-section'); // Added this line
+        const inputSection = document.getElementById('input-section');
         const serialInput = document.getElementById('serialInput');
         const verifyButton = document.getElementById('verifyButton');
         const scanButton = document.getElementById('scanButton');
@@ -91,14 +94,12 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // This listener ensures we only proceed after authentication is complete.
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         const userId = user.uid;
                         userIdDisplay.textContent = userId;
                         console.log(`Signed in with user ID: ${userId}`);
-                        // Authentication is ready, show the input section
-                        inputSection.classList.remove('hidden');
+                        inputSection.classList.remove('hidden'); // Show input section after successful login
                         listenForCards();
                     } else {
                         console.log("No user is signed in. Attempting to sign in...");
