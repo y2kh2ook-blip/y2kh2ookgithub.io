@@ -288,14 +288,14 @@
         </div>
 
         <div id="add-card-screen" class="screen">
-            <h2>เพิ่มการ์ด</h2>
-            <button id="nfc-scan-btn">แตะเพื่อสแกนการ์ด (บนอุปกรณ์ที่รองรับ)</button>
-            <p>หรือ</p>
-            <input type="text" id="serial-input" placeholder="กรอกรหัสการ์ดด้วยตนเอง">
-            <button id="manual-lookup-btn">ดึงข้อมูลการ์ด</button>
-            <p id="status-message"></p>
-            <button id="back-to-collection-btn">กลับไปคอลเลคชั่น</button>
-        </div>
+    <h2>เพิ่มการ์ด</h2>
+    <button id="nfc-scan-btn">แตะเพื่อสแกนการ์ด (บนอุปกรณ์ที่รองรับ)</button>
+    <p>หรือ</p>
+    <input type="text" id="serial-input" placeholder="กรอกรหัสการ์ดด้วยตนเอง">
+    <button id="manual-lookup-btn">ดึงข้อมูลการ์ด</button>
+    <p id="status-message"></p>
+    <button id="back-to-collection-btn">กลับไปคอลเลคชั่น</button>
+</div>
 
         <div id="card-detail-screen" class="screen">
             <div class="card-container">
@@ -475,30 +475,28 @@ const firebaseConfig = {
         });
 
         addCardMenuBtn.addEventListener('click', () => {
-            showScreen('add-card-screen');
-            statusMessage.innerText = '';
-            serialInput.value = '';
-        });
+    showScreen('add-card-screen');
+    statusMessage.innerText = '';
+    serialInput.value = '';
+});
 
-        backToCollectionBtn.addEventListener('click', () => {
-            showScreen('collection-screen');
-        });
+backToCollectionBtn.addEventListener('click', () => {
+    showScreen('collection-screen');
+});
 
-        nfcScanBtn.addEventListener('click', nfcScan);
+manualLookupBtn.addEventListener('click', () => {
+    const serialNumber = serialInput.value.trim();
+    if (serialNumber) {
+        getCardData(serialNumber);
+    } else {
+        statusMessage.innerText = 'กรุณากรอกรหัสการ์ด';
+    }
+});
 
-        manualLookupBtn.addEventListener('click', () => {
-            const serialNumber = serialInput.value.trim();
-            if (serialNumber) {
-                getCardData(serialNumber);
-            } else {
-                statusMessage.innerText = 'กรุณากรอกรหัสการ์ด';
-            }
-        });
-
-        // Initial screen on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            showScreen('login-screen');
-        });
+// ส่วนของ NFC scan
+nfcScanBtn.addEventListener('click', () => {
+  // เรียกใช้ฟังก์ชัน nfcScan
+});
     </script>
 </body>
 </html>
