@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CardVerse</title>
     <style>
+        /* General Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 20px;
+            min-height: 100vh;
             background-color: #1a1523;
             color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
         }
         .container {
             max-width: 600px;
@@ -22,6 +25,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             text-align: center;
+            box-sizing: border-box;
         }
         h1 {
             color: #ffd700;
@@ -36,9 +40,12 @@
         }
         .screen {
             display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
         .screen.active {
-            display: block;
+            display: flex;
         }
 
         /* --- Login Screen --- */
@@ -57,6 +64,7 @@
             background-color: #2e2637;
             color: #e0e0e0;
             border: 1px solid #5a4b6b;
+            box-sizing: border-box;
         }
         #login-screen button {
             cursor: pointer;
@@ -72,10 +80,17 @@
 
         /* --- Collection Screen --- */
         #collection-screen {
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            padding-bottom: 70px; /* Space for the bottom menu */
+            box-sizing: border-box;
+        }
+        .card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 15px;
             padding: 20px 0;
+            width: 100%;
         }
         .card-thumbnail {
             background-color: #2e2637;
@@ -103,10 +118,16 @@
             color: #e0e0e0;
         }
         .collection-menu {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             display: flex;
             justify-content: space-around;
             padding: 15px;
+            background-color: #2a2232;
             border-top: 1px solid #a98d36;
+            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
         }
         .collection-menu button {
             background: none;
@@ -117,13 +138,25 @@
         }
 
         /* --- Card Detail Screen --- */
-        .card-container {
+        #card-detail-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .card-container {
+            width: 90%;
+            max-width: 400px;
             position: relative;
             padding: 30px;
-            /* คุณต้องแทนที่ URL นี้ด้วยเส้นทางของภาพกรอบการ์ดของคุณเอง */
-            background: url('your-card-border-image.png') no-repeat center center; 
+            background: url('your-card-border-image.png') no-repeat center center;
             background-size: 100% 100%;
+            box-sizing: border-box;
         }
         .card-display {
             background-color: #3a2e48;
@@ -182,7 +215,7 @@
             color: #ffd700;
             font-weight: bold;
         }
-        #back-btn {
+        #back-btn, #close-detail-btn {
             background-color: #666;
             padding: 10px 15px;
             border: none;
@@ -191,7 +224,7 @@
             cursor: pointer;
             margin-top: 20px;
         }
-        #back-btn:hover {
+        #back-btn:hover, #close-detail-btn:hover {
             background-color: #444;
         }
     </style>
@@ -215,12 +248,12 @@
         </div>
 
         <div id="collection-screen" class="screen">
-            <h2>คอลเลกชันของฉัน</h2>
-            <div id="card-list">
+            <h2>คอลเลคชั่นของฉัน</h2>
+            <div id="card-list" class="card-grid">
                 </div>
             <div class="collection-menu">
                 <button>หน้าหลัก</button>
-                <button>คอลเลกชัน</button>
+                <button>คอลเลคชั่น</button>
                 <button>ตลาดซื้อขาย</button>
                 <button>โปรไฟล์</button>
             </div>
@@ -253,8 +286,8 @@
                         </div>
                     </div>
                 </div>
+                <button id="close-detail-btn">กลับ</button>
             </div>
-            <button id="back-btn">กลับ</button>
         </div>
     </div>
     
@@ -288,7 +321,7 @@ const firebaseConfig = {
         const cardAttack = document.getElementById('card-attack');
         const cardDefense = document.getElementById('card-defense');
         const cardCost = document.getElementById('card-cost');
-        const backBtn = document.getElementById('back-btn');
+        const closeDetailBtn = document.getElementById('close-detail-btn');
 
         //--- Main Functions ---
         function showScreen(screenId) {
@@ -323,7 +356,7 @@ const firebaseConfig = {
                 })
                 .catch((error) => {
                     console.error("Error fetching cards:", error);
-                    alert("ไม่สามารถดึงคอลเลกชันได้");
+                    alert("ไม่สามารถดึงคอลเลคชั่นได้");
                 });
         }
 
@@ -360,16 +393,16 @@ const firebaseConfig = {
 
         //--- Event Listeners ---
         loginBtn.addEventListener('click', () => {
-            // ในการใช้งานจริง คุณต้องจัดการขั้นตอนการยืนยันตัวตน (Authentication) ที่นี่
+            // In a real application, you would handle authentication here
             showScreen('collection-screen');
             fetchAndRenderCards();
         });
 
-        backBtn.addEventListener('click', () => {
+        closeDetailBtn.addEventListener('click', () => {
             showScreen('collection-screen');
         });
 
-        // กำหนดหน้าจอเริ่มต้นเมื่อโหลดหน้าเว็บครั้งแรก
+        // Initial screen on page load
         document.addEventListener('DOMContentLoaded', () => {
             showScreen('login-screen');
         });
