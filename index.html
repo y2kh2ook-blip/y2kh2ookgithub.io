@@ -112,24 +112,11 @@
         #card-display-screen.active {
             display: block;
         }
-
-        /* The main card container with the image border */
-        .card-container {
-            width: 100%;
-            position: relative;
-            padding: 30px; /* Adjust padding to match your border image's thickness */
-            /* Replace the URL with your actual image file path */
-            background: url('https://raw.githubusercontent.com/y2kh2ook-blip/y2kh2ookgithub.io/refs/heads/main/erasebg-transformed.png') no-repeat center center;
-            background-size: 100% 100%;
-        }
-
-        /* Inner card content */
         .card-display {
-            background-color: #3a2e48; /* Use a semi-transparent background color for the content area */
-            border-radius: 10px;
             padding: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            border: 1px solid #a98d36;
+            border: 2px solid #a98d36; 
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
         }
         .card-display img {
             width: 90%;
@@ -219,29 +206,27 @@
         </div>
 
         <div id="card-display-screen">
-            <div class="card-container">
-                <div id="card-display" class="card-display">
-                    <img id="card-image" src="" alt="Card Image">
-                    <div class="card-details">
-                        <div class="card-header">
-                            <h2 id="card-name"></h2>
-                            <p id="card-rarity"></p>
+            <div id="card-display" class="card-display">
+                <img id="card-image" src="" alt="Card Image">
+                <div class="card-details">
+                    <div class="card-header">
+                        <h2 id="card-name"></h2>
+                        <p id="card-rarity"></p>
+                    </div>
+                    <p id="card-token-id"></p>
+                    <p id="card-description"></p>
+                    <div class="card-stats">
+                        <div class="stat-item">
+                            <strong>Attack</strong>
+                            <span id="card-attack"></span>
                         </div>
-                        <p id="card-token-id"></p>
-                        <p id="card-description"></p>
-                        <div class="card-stats">
-                            <div class="stat-item">
-                                <strong>Attack</strong>
-                                <span id="card-attack"></span>
-                            </div>
-                            <div class="stat-item">
-                                <strong>Defense</strong>
-                                <span id="card-defense"></span>
-                            </div>
-                            <div class="stat-item">
-                                <strong>Cost</strong>
-                                <span id="card-cost"></span>
-                            </div>
+                        <div class="stat-item">
+                            <strong>Defense</strong>
+                            <span id="card-defense"></span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Cost</strong>
+                            <span id="card-cost"></span>
                         </div>
                     </div>
                 </div>
@@ -383,4 +368,4 @@ const firebaseConfig = {
         document.addEventListener('DOMContentLoaded', showWelcomeScreen);
     </script>
 </body>
-</html
+</html>
