@@ -47,6 +47,10 @@
         .screen.active {
             display: flex;
         }
+        #add-card-screen h2, #add-card-screen p {
+            color: #e0e0e0;
+            margin-top: 20px;
+        }
 
         /* --- Login Screen --- */
         #login-screen {
@@ -82,7 +86,7 @@
         #collection-screen {
             max-height: calc(100vh - 40px);
             overflow-y: auto;
-            padding-bottom: 70px; /* Space for the bottom menu */
+            padding-bottom: 70px;
             box-sizing: border-box;
         }
         .card-grid {
@@ -128,6 +132,7 @@
             background-color: #2a2232;
             border-top: 1px solid #a98d36;
             box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 100;
         }
         .collection-menu button {
             background: none;
@@ -135,6 +140,29 @@
             color: #e0e0e0;
             font-size: 16px;
             cursor: pointer;
+        }
+
+        /* --- Add Card Screen --- */
+        #add-card-screen {
+            display: none;
+        }
+        #nfc-scan-btn, #manual-lookup-btn, #back-to-collection-btn {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #nfc-scan-btn:hover, #manual-lookup-btn:hover, #back-to-collection-btn:hover {
+            background-color: #777;
+        }
+        #status-message {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #ffd700;
         }
 
         /* --- Card Detail Screen --- */
@@ -252,11 +280,21 @@
             <div id="card-list" class="card-grid">
                 </div>
             <div class="collection-menu">
-                <button>หน้าหลัก</button>
-                <button>คอลเลคชั่น</button>
-                <button>ตลาดซื้อขาย</button>
-                <button>โปรไฟล์</button>
+                <button id="home-btn">หน้าหลัก</button>
+                <button id="collection-btn">คอลเลคชั่น</button>
+                <button id="add-card-menu-btn">เพิ่มการ์ด</button>
+                <button id="profile-btn">โปรไฟล์</button>
             </div>
+        </div>
+
+        <div id="add-card-screen" class="screen">
+            <h2>เพิ่มการ์ด</h2>
+            <button id="nfc-scan-btn">แตะเพื่อสแกนการ์ด (บนอุปกรณ์ที่รองรับ)</button>
+            <p>หรือ</p>
+            <input type="text" id="serial-input" placeholder="กรอกรหัสการ์ดด้วยตนเอง">
+            <button id="manual-lookup-btn">ดึงข้อมูลการ์ด</button>
+            <p id="status-message"></p>
+            <button id="back-to-collection-btn">กลับไปคอลเลคชั่น</button>
         </div>
 
         <div id="card-detail-screen" class="screen">
@@ -309,6 +347,7 @@ const firebaseConfig = {
         //--- DOM Elements ---
         const loginScreen = document.getElementById('login-screen');
         const collectionScreen = document.getElementById('collection-screen');
+        const addCardScreen = document.getElementById('add-card-screen');
         const cardDetailScreen = document.getElementById('card-detail-screen');
 
         const loginBtn = document.getElementById('login-btn');
@@ -322,6 +361,11 @@ const firebaseConfig = {
         const cardDefense = document.getElementById('card-defense');
         const cardCost = document.getElementById('card-cost');
         const closeDetailBtn = document.getElementById('close-detail-btn');
+        const addCardMenuBtn = document.getElementById('add-card-menu-btn');
+        const backToCollectionBtn = document.getElementById('back-to-collection-btn');
+        const manualLookupBtn = document.getElementById('manual-lookup-btn');
+        const serialInput = document.getElementById('serial-input');
+        const statusMessage = document.getElementById('status-message');
 
         //--- Main Functions ---
         function showScreen(screenId) {
@@ -331,16 +375,15 @@ const firebaseConfig = {
             document.getElementById(screenId).classList.add('active');
         }
 
-        // --- Fetch and Render Cards ---
         function fetchAndRenderCards() {
             db.collection("cards").get()
                 .then((querySnapshot) => {
-                    cardList.innerHTML = ''; // Clear previous cards
+                    cardList.innerHTML = '';
                     querySnapshot.forEach((doc) => {
                         const cardData = doc.data();
                         const cardElement = document.createElement('div');
                         cardElement.className = 'card-thumbnail';
-                        cardElement.dataset.serialNumber = cardData.serial_number; // Store serial number
+                        cardElement.dataset.serialNumber = cardData.serial_number;
                         
                         cardElement.innerHTML = `
                             <img src="${cardData.image_url}" alt="${cardData.name}">
@@ -361,6 +404,7 @@ const firebaseConfig = {
         }
 
         function getCardData(serialNumber) {
+            statusMessage.innerText = 'กำลังดึงข้อมูลการ์ด...';
             db.collection("cards").where("serial_number", "==", serialNumber).get()
                 .then((querySnapshot) => {
                     if (!querySnapshot.empty) {
@@ -381,25 +425,74 @@ const firebaseConfig = {
                         }
                         
                         showScreen('card-detail-screen');
+                        statusMessage.innerText = '';
                     } else {
-                        alert(`ไม่พบข้อมูลการ์ดสำหรับ serial number: ${serialNumber}`);
+                        statusMessage.innerText = `ไม่พบข้อมูลการ์ดสำหรับ serial number: ${serialNumber}`;
+                        setTimeout(() => {
+                            statusMessage.innerText = '';
+                        }, 3000);
                     }
                 })
                 .catch((error) => {
                     console.error("Error getting document:", error);
-                    alert('เกิดข้อผิดพลาดในการดึงข้อมูล');
+                    statusMessage.innerText = 'เกิดข้อผิดพลาดในการดึงข้อมูล';
+                    setTimeout(() => {
+                        statusMessage.innerText = '';
+                    }, 3000);
                 });
+        }
+        
+        // --- NFC Scan Function ---
+        async function nfcScan() {
+            if ('NDEFReader' in window) {
+                try {
+                    statusMessage.innerText = 'แตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
+                    const reader = new NDEFReader();
+                    await reader.scan();
+
+                    reader.addEventListener("reading", ({ serialNumber }) => {
+                        statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
+                        console.log("Serial Number:", serialNumber);
+                        getCardData(serialNumber);
+                    });
+                } catch (error) {
+                    statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC: กรุณาลองใหม่อีกครั้ง';
+                    console.error("NFC Scan Error:", error);
+                }
+            } else {
+                statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
+            }
         }
 
         //--- Event Listeners ---
         loginBtn.addEventListener('click', () => {
-            // In a real application, you would handle authentication here
             showScreen('collection-screen');
             fetchAndRenderCards();
         });
 
         closeDetailBtn.addEventListener('click', () => {
             showScreen('collection-screen');
+        });
+
+        addCardMenuBtn.addEventListener('click', () => {
+            showScreen('add-card-screen');
+            statusMessage.innerText = '';
+            serialInput.value = '';
+        });
+
+        backToCollectionBtn.addEventListener('click', () => {
+            showScreen('collection-screen');
+        });
+
+        nfcScanBtn.addEventListener('click', nfcScan);
+
+        manualLookupBtn.addEventListener('click', () => {
+            const serialNumber = serialInput.value.trim();
+            if (serialNumber) {
+                getCardData(serialNumber);
+            } else {
+                statusMessage.innerText = 'กรุณากรอกรหัสการ์ด';
+            }
         });
 
         // Initial screen on page load
