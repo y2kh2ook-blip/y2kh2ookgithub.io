@@ -112,114 +112,24 @@
         #card-display-screen.active {
             display: block;
         }
-        .card-wrapper {
-    background-color: #3a2e48;
-    border: 2px solid #a98d36;
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
-    padding: 20px;
-}
-        .card-image-section {
-    position: relative;
-    margin-bottom: 20px;
-}
 
-.card-image-section img {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
+        /* The main card container with the image border */
+        .card-container {
+            width: 100%;
+            position: relative;
+            padding: 30px; /* Adjust padding to match your border image's thickness */
+            /* Replace the URL with your actual image file path */
+            background: url('card-border.png') no-repeat center center;
+            background-size: 100% 100%;
+        }
 
-.rarity-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 5px 10px;
-    border-radius: 15px;
-    background-color: rgba(255, 215, 0, 0.8);
-    color: #1a1523;
-    font-weight: bold;
-    font-size: 0.9em;
-    text-transform: uppercase;
-}
-
-.card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.card-content h2 {
-    margin: 0;
-    font-size: 2em;
-    color: #ffd700;
-    text-shadow: 2px 2px 4px #000;
-}
-
-.description-box {
-    margin: 15px 0;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    border: 1px dashed #a98d36;
-}
-
-.stats-container {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    margin-top: 20px;
-}
-
-.stat-item {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.stat-icon {
-    font-size: 1.5em;
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    font-size: 1.8em;
-    color: #ffd700;
-    font-weight: bold;
-}
-
-.stat-label {
-    font-size: 0.9em;
-    color: #ccc;
-    margin: 0;
-}
-
-.token-id-container {
-    margin-top: 20px;
-    padding-top: 10px;
-    border-top: 1px solid #a98d36;
-}
-
-#back-btn {
-    background-color: #666;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    margin-top: 20px;
-}
-
-#back-btn:hover {
-    background-color: #444;
-}
+        /* Inner card content */
         .card-display {
+            background-color: #3a2e48; /* Use a semi-transparent background color for the content area */
+            border-radius: 10px;
             padding: 15px;
-            border: 2px solid #a98d36; 
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid #a98d36;
         }
         .card-display img {
             width: 90%;
@@ -309,45 +219,36 @@
         </div>
 
         <div id="card-display-screen">
-    <div class="card-wrapper">
-        <div id="card-display" class="card-display">
-            <div class="card-image-section">
-                <img id="card-image" src="" alt="Card Image">
-                <div class="rarity-badge" id="card-rarity"></div>
-            </div>
-
-            <div class="card-content">
-                <h2 id="card-name"></h2>
-                <div class="description-box">
-                    <p id="card-description"></p>
-                </div>
-                
-                <div class="stats-container">
-                    <div class="stat-item">
-                        <span class="stat-icon">⚔️</span>
-                        <span id="card-attack" class="stat-value"></span>
-                        <p class="stat-label">Attack</p>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-icon">🛡️</span>
-                        <span id="card-defense" class="stat-value"></span>
-                        <p class="stat-label">Defense</p>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-icon">⚡️</span>
-                        <span id="card-cost" class="stat-value"></span>
-                        <p class="stat-label">Cost</p>
+            <div class="card-container">
+                <div id="card-display" class="card-display">
+                    <img id="card-image" src="" alt="Card Image">
+                    <div class="card-details">
+                        <div class="card-header">
+                            <h2 id="card-name"></h2>
+                            <p id="card-rarity"></p>
+                        </div>
+                        <p id="card-token-id"></p>
+                        <p id="card-description"></p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <strong>Attack</strong>
+                                <span id="card-attack"></span>
+                            </div>
+                            <div class="stat-item">
+                                <strong>Defense</strong>
+                                <span id="card-defense"></span>
+                            </div>
+                            <div class="stat-item">
+                                <strong>Cost</strong>
+                                <span id="card-cost"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div class="token-id-container">
-                <p><strong>Token ID:</strong> <span id="card-token-id"></span></p>
-            </div>
+            <button id="back-btn">กลับ</button>
         </div>
     </div>
-    <button id="back-btn">กลับ</button>
-</div>
     
     <script>
         // Your web app's Firebase configuration
@@ -482,4 +383,4 @@ const firebaseConfig = {
         document.addEventListener('DOMContentLoaded', showWelcomeScreen);
     </script>
 </body>
-</html>
+</html
