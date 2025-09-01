@@ -22,6 +22,7 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
         }
         h1 {
             color: #ffd700;
@@ -35,11 +36,33 @@
             margin: 20px 0;
         }
 
-        /* Controls Section */
+        /* Initial Screen & Card Display */
+        #welcome-screen, #card-display-screen {
+            display: none; /* ซ่อนทั้งสองส่วนไว้ก่อน */
+        }
+        #welcome-screen.active, #card-display-screen.active {
+            display: block; /* แสดงเฉพาะส่วนที่มี class 'active' */
+        }
+        #welcome-screen h2 {
+            font-size: 1.5em;
+            margin-top: 0;
+        }
+        #welcome-screen p {
+            font-size: 1em;
+            color: #ccc;
+        }
+        #welcome-screen .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Controls Section (used within welcome-screen) */
         .controls {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .controls input {
             flex-grow: 1;
@@ -76,12 +99,12 @@
             margin-top: 10px; 
             text-align: center; 
         }
+        .controls-text {
+            color: #ccc;
+            margin: 5px 0;
+        }
 
         /* Card Display Section */
-        .card-display {
-            text-align: center;
-            padding: 15px;
-        }
         .card-display img {
             width: 100%;
             height: auto;
@@ -99,6 +122,18 @@
             font-size: 1.1em;
             color: #e0e0e0;
         }
+        #back-btn {
+            background-color: #666;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #back-btn:hover {
+            background-color: #444;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
@@ -106,26 +141,36 @@
 <body>
     <div class="container">
         <h1>CardVerse Viewer</h1>
-        <div id="controls-container" class="controls">
-            <button id="nfc-scan-btn">สแกนการ์ด NFC</button>
-            <input type="text" id="serial-input" placeholder="หรือกรอกรหัสซีเรียล">
-            <button id="manual-lookup-btn">ค้นหา</button>
-        </div>
-        <p id="status-message"></p>
 
-        <hr>
+        <div id="welcome-screen" class="active">
+            <h2>ยินดีต้อนรับสู่ CardVerse</h2>
+            <p>แตะเพื่อสแกนการ์ด หรือกรอกรหัสด้วยตนเอง</p>
 
-        <div id="card-display" class="card-display">
-            <img id="card-image" src="" alt="Card Image">
-            <div id="card-details">
-                <h2 id="card-name"></h2>
-                <p id="card-rarity"></p>
-                <p id="card-token-id"></p>
-                <p id="card-description"></p>
-                <p><strong>Attack:</strong> <span id="card-attack"></span></p>
-                <p><strong>Defense:</strong> <span id="card-defense"></span></p>
-                <p><strong>Cost:</strong> <span id="card-cost"></span></p>
+            <div class="button-group">
+                <button id="nfc-scan-btn">แตะเพื่อสแกนการ์ด (บนอุปกรณ์ที่รองรับ)</button>
+                <div class="controls-text">หรือกรอกรหัสด้วยตนเอง</div>
+                <div class="controls">
+                    <input type="text" id="serial-input" placeholder="ตัวอย่าง: nfc-card-12345">
+                    <button id="manual-lookup-btn">ดึงข้อมูลการ์ด</button>
+                </div>
             </div>
+            <p id="status-message"></p>
+        </div>
+
+        <div id="card-display-screen">
+            <div id="card-display" class="card-display">
+                <img id="card-image" src="" alt="Card Image">
+                <div id="card-details">
+                    <h2 id="card-name"></h2>
+                    <p id="card-rarity"></p>
+                    <p id="card-token-id"></p>
+                    <p id="card-description"></p>
+                    <p><strong>Attack:</strong> <span id="card-attack"></span></p>
+                    <p><strong>Defense:</strong> <span id="card-defense"></span></p>
+                    <p><strong>Cost:</strong> <span id="card-cost"></span></p>
+                </div>
+            </div>
+            <button id="back-btn">กลับ</button>
         </div>
     </div>
     
@@ -141,39 +186,49 @@ const firebaseConfig = {
   appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
   measurementId: "G-WHQ7CV91X0"
 };
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         //--- DOM Elements ---
-        const controlsContainer = document.getElementById('controls-container');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const cardDisplayScreen = document.getElementById('card-display-screen');
         const nfcScanBtn = document.getElementById('nfc-scan-btn');
         const serialInput = document.getElementById('serial-input');
         const manualLookupBtn = document.getElementById('manual-lookup-btn');
         const statusMessage = document.getElementById('status-message');
-        const cardDisplay = document.getElementById('card-display');
         const cardImage = document.getElementById('card-image');
         const cardName = document.getElementById('card-name');
         const cardRarity = document.getElementById('card-rarity');
+        const cardTokenId = document.getElementById('card-token-id');
         const cardDescription = document.getElementById('card-description');
         const cardAttack = document.getElementById('card-attack');
         const cardDefense = document.getElementById('card-defense');
         const cardCost = document.getElementById('card-cost');
-        const cardTokenId = document.getElementById('card-token-id'); 
+        const backBtn = document.getElementById('back-btn');
 
         //--- Main Functions ---
+        function showWelcomeScreen() {
+            welcomeScreen.classList.add('active');
+            cardDisplayScreen.classList.remove('active');
+        }
+
+        function showCardScreen() {
+            welcomeScreen.classList.remove('active');
+            cardDisplayScreen.classList.add('active');
+            statusMessage.style.display = 'none';
+        }
+
         function getCardData(serialNumber) {
             statusMessage.innerText = 'กำลังค้นหาข้อมูลการ์ด...';
+            statusMessage.style.display = 'block';
+
             db.collection("cards").where("serial_number", "==", serialNumber).get()
                 .then((querySnapshot) => {
                     if (!querySnapshot.empty) {
                         const doc = querySnapshot.docs[0];
                         const cardData = doc.data();
-
-                        controlsContainer.style.display = 'none';
-                        statusMessage.style.display = 'none';
-
+                        
+                        // แสดงผลข้อมูล
                         cardImage.src = cardData.image_url;
                         cardImage.alt = cardData.name;
                         cardName.innerText = cardData.name;
@@ -186,17 +241,17 @@ const firebaseConfig = {
                             cardDefense.innerText = cardData.stats.defense;
                             cardCost.innerText = cardData.stats.cost;
                         }
+                        
+                        showCardScreen();
                     } else {
                         statusMessage.innerText = `ไม่พบข้อมูลการ์ดสำหรับ serial number: ${serialNumber}`;
                         clearCardDisplay();
-                        showControls();
                     }
                 })
                 .catch((error) => {
                     console.error("Error getting document:", error);
                     statusMessage.innerText = 'เกิดข้อผิดพลาดในการดึงข้อมูล';
                     clearCardDisplay();
-                    showControls();
                 });
         }
         
@@ -210,11 +265,6 @@ const firebaseConfig = {
             cardAttack.innerText = "";
             cardDefense.innerText = "";
             cardCost.innerText = "";
-        }
-        
-        function showControls() {
-            controlsContainer.style.display = 'flex';
-            statusMessage.style.display = 'block';
         }
         
         //--- Event Listeners ---
@@ -233,7 +283,6 @@ const firebaseConfig = {
                 } catch (error) {
                     statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC';
                     console.error("NFC Scan Error:", error);
-                    showControls();
                 }
             } else {
                 statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
@@ -248,6 +297,14 @@ const firebaseConfig = {
                 statusMessage.innerText = 'กรุณากรอกรหัสซีเรียล';
             }
         });
+
+        backBtn.addEventListener('click', () => {
+            showWelcomeScreen();
+            clearCardDisplay();
+        });
+
+        // แสดงหน้าจอเริ่มต้นเมื่อโหลดหน้าเว็บครั้งแรก
+        document.addEventListener('DOMContentLoaded', showWelcomeScreen);
     </script>
 </body>
 </html>
