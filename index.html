@@ -366,8 +366,36 @@ const firebaseConfig = {
         const manualLookupBtn = document.getElementById('manual-lookup-btn');
         const serialInput = document.getElementById('serial-input');
         const statusMessage = document.getElementById('status-message');
+        const addCardScreen = document.getElementById('add-card-screen');
+const addCardMenuBtn = document.getElementById('add-card-menu-btn');
+const backToCollectionBtn = document.getElementById('back-to-collection-btn');
+const nfcScanBtn = document.getElementById('nfc-scan-btn');
+const manualLookupBtn = document.getElementById('manual-lookup-btn');
+const serialInput = document.getElementById('serial-input');
+const statusMessage = document.getElementById('status-message');
 
         //--- Main Functions ---
+        // --- NFC Scan Function ---
+async function nfcScan() {
+    if ('NDEFReader' in window) {
+        try {
+            statusMessage.innerText = 'แตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
+            const reader = new NDEFReader();
+            await reader.scan();
+
+            reader.addEventListener("reading", ({ serialNumber }) => {
+                statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
+                console.log("Serial Number:", serialNumber);
+                getCardData(serialNumber);
+            });
+        } catch (error) {
+            statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC: กรุณาลองใหม่อีกครั้ง';
+            console.error("NFC Scan Error:", error);
+        }
+    } else {
+        statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
+    }
+}
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
@@ -465,6 +493,26 @@ const firebaseConfig = {
         }
 
         //--- Event Listeners ---
+        addCardMenuBtn.addEventListener('click', () => {
+    showScreen('add-card-screen');
+    statusMessage.innerText = '';
+    serialInput.value = '';
+});
+
+backToCollectionBtn.addEventListener('click', () => {
+    showScreen('collection-screen');
+});
+
+nfcScanBtn.addEventListener('click', nfcScan);
+
+manualLookupBtn.addEventListener('click', () => {
+    const serialNumber = serialInput.value.trim();
+    if (serialNumber) {
+        getCardData(serialNumber);
+    } else {
+        statusMessage.innerText = 'กรุณากรอกรหัสการ์ด';
+    }
+});
         loginBtn.addEventListener('click', () => {
             showScreen('collection-screen');
             fetchAndRenderCards();
