@@ -281,21 +281,57 @@ const firebaseConfig = {
                 showScreen(nfcScreen);
             });
 
-            scanButtonNFC.addEventListener('click', () => {
-                showMessage('กำลังสแกนการ์ด... กรุณาแตะการ์ดที่ด้านหลังอุปกรณ์', 'info');
-                cardDisplay.classList.add('hidden');
-                cardInfo.innerHTML = '';
-                
-                setTimeout(() => {
-                    // Simulate a successful scan by picking a random card from the fetched data
-                    if (cardsData.length > 0) {
-                        const randomCard = cardsData[Math.floor(Math.random() * cardsData.length)];
-                        displayScannedCardData(randomCard);
+            scanButtonNFC.addEventListener('click', async () => {
+    showMessage('กำลังสแกนการ์ด... กรุณาแตะการ์ดที่ด้านหลังอุปกรณ์', 'info');
+    cardDisplay.classList.add('hidden');
+    cardInfo.innerHTML = '';
+    
+    // ตรวจสอบว่าเบราว์เซอร์รองรับ Web NFC หรือไม่
+    if ('NDEFReader' in window) {
+        try {
+            const ndef = new NDEFReader();
+            await ndef.scan();
+            console.log("เริ่มสแกน...");
+
+            ndef.onreading = event => {
+                const message = event.message;
+                const record = message.records[0];
+                let serialNumber = '';
+
+                if (record.recordType === 'text') {
+                    const textDecoder = new TextDecoder();
+                    serialNumber = textDecoder.decode(record.data);
+                    
+                    // นำ serialNumber ที่ได้ไปค้นหาการ์ดใน Firebase
+                    const scannedCard = cardsData.find(card => card.serial_number === serialNumber);
+                    
+                    if (scannedCard) {
+                        displayScannedCardData(scannedCard);
                     } else {
-                        showMessage('ไม่พบข้อมูลการ์ดสำหรับสแกน', 'error');
+                        showMessage('ไม่พบการ์ดใบนี้ในฐานข้อมูล', 'error');
                     }
-                }, 2000); // 2-second delay
-            });
+                } else {
+                    showMessage('รูปแบบข้อมูลไม่ถูกต้อง', 'error');
+                }
+            };
+        } catch (error) {
+            showMessage(`การสแกนล้มเหลว: ${error.message}`, 'error');
+        }
+    } else {
+        // กรณีเบราว์เซอร์ไม่รองรับ
+        showMessage('อุปกรณ์ของคุณไม่รองรับ Web NFC', 'error');
+        
+        // โค้ดจำลอง (simulation) เดิมที่คุณใช้
+        setTimeout(() => {
+            if (cardsData.length > 0) {
+                const randomCard = cardsData[Math.floor(Math.random() * cardsData.length)];
+                displayScannedCardData(randomCard);
+            } else {
+                showMessage('ไม่พบข้อมูลการ์ดสำหรับสแกน', 'error');
+            }
+        }, 2000);
+    }
+});
 
             // Navigation
             navCollection.addEventListener('click', () => {
