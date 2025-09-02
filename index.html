@@ -1,571 +1,277 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardVerse</title>
+    <title>CardVerse - Phygital Game Card</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* General Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #1a1523;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
         }
-        .container {
-            max-width: 600px;
-            width: 100%;
-            background: #3a2e48;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            box-sizing: border-box;
+        .logo-text {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ecf0f1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
         }
-        h1 {
-            color: #ffd700;
-            text-align: center;
-            margin-bottom: 25px;
+        .btn-social {
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        hr {
-            border: 0;
-            height: 1px;
-            background: #a98d36;
-            margin: 20px 0;
+        .btn-social:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        .screen.active {
-            display: flex;
-        }
-        #add-card-screen h2, #add-card-screen p {
-            color: #e0e0e0;
-            margin-top: 20px;
-        }
-
-        /* --- Login Screen --- */
-        #login-screen {
-            padding-top: 50px;
-        }
-        #login-screen input, #login-screen button {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        #login-screen input {
-            background-color: #2e2637;
-            color: #e0e0e0;
-            border: 1px solid #5a4b6b;
-            box-sizing: border-box;
-        }
-        #login-screen button {
-            cursor: pointer;
-            color: white;
-            transition: background-color 0.3s;
-        }
-        #google-login-btn { background-color: #ea4335; }
-        #facebook-login-btn { background-color: #1877f2; }
-        #login-btn { background-color: #2e2637; }
-        #google-login-btn:hover { background-color: #c43229; }
-        #facebook-login-btn:hover { background-color: #1562c5; }
-        #login-btn:hover { background-color: #1f1b25; }
-
-        /* --- Collection Screen --- */
-        #collection-screen {
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
-            padding-bottom: 70px;
-            box-sizing: border-box;
-        }
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            padding: 20px 0;
-            width: 100%;
-        }
-        .card-thumbnail {
-            background-color: #2e2637;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .card-thumbnail:hover {
-            transform: translateY(-5px);
-        }
-        .card-thumbnail img {
-            width: 100%;
-            border-radius: 5px;
-            margin-bottom: 5px;
-        }
-        .card-thumbnail h3 {
-            margin: 0;
-            font-size: 0.9em;
-            color: #ffd700;
-        }
-        .card-thumbnail p {
-            margin: 0;
-            font-size: 0.8em;
-            color: #e0e0e0;
-        }
-        .collection-menu {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            background-color: #2a2232;
-            border-top: 1px solid #a98d36;
-            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 100;
-        }
-        .collection-menu button {
-            background: none;
-            border: none;
-            color: #e0e0e0;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        /* --- Add Card Screen --- */
-        #add-card-screen {
-            display: none;
-        }
-        #nfc-scan-btn, #manual-lookup-btn, #back-to-collection-btn {
-            background-color: #555;
-            color: white;
-            padding: 15px;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        #nfc-scan-btn:hover, #manual-lookup-btn:hover, #back-to-collection-btn:hover {
-            background-color: #777;
-        }
-        #status-message {
-            margin-top: 10px;
-            font-size: 1.1em;
-            color: #ffd700;
-        }
-
-        /* --- Card Detail Screen --- */
-        #card-detail-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .card-container {
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-            padding: 30px;
-            background: url('your-card-border-image.png') no-repeat center center;
-            background-size: 100% 100%;
-            box-sizing: border-box;
-        }
-        .card-display {
-            background-color: #3a2e48;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            border: 1px solid #a98d36;
-        }
-        .card-display img {
-            width: 90%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-        }
-        .card-details {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .card-details h2 {
-            margin: 0;
-            font-size: 2.5em;
-            color: #ffd700;
-            text-shadow: 2px 2px 4px #000;
-        }
-        .card-details p {
-            margin: 0;
-            font-size: 1.1em;
-            color: #e0e0e0;
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .card-stats {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px dashed #a98d36;
-        }
-        .stat-item {
-            text-align: center;
-        }
-        .stat-item strong {
-            display: block;
-            font-size: 1.2em;
-            color: #fff;
-        }
-        .stat-item span {
-            font-size: 1.5em;
-            color: #ffd700;
-            font-weight: bold;
-        }
-        #back-btn, #close-detail-btn {
-            background-color: #666;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        #back-btn:hover, #close-detail-btn:hover {
-            background-color: #444;
+        .input-field:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>CardVerse</h1>
+<body class="flex items-center justify-center min-h-screen">
 
-        <div id="login-screen" class="screen active">
-            <h2>Phygital Game Card</h2>
-            <button id="google-login-btn">เข้าสู่ระบบด้วย Google</button>
-            <button id="facebook-login-btn">เข้าสู่ระบบด้วย Facebook</button>
-            <hr>
-            <p>หรือ</p>
-            <input type="text" id="username-input" placeholder="ชื่อผู้ใช้">
-            <input type="password" id="password-input" placeholder="รหัสผ่าน">
-            <button id="login-btn">เข้าสู่ระบบ</button>
-            <p><a href="#" style="color:#b08d00;">ยังไม่มีบัญชีใช่ไหม? ลงทะเบียนที่นี่</a></p>
+    <div id="login-screen" class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md mx-4 sm:mx-6 md:mx-auto text-center" style="display: block;">
+        <div class="mb-8">
+            <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 12l10 10 10-10L12 2zm0 18.83L3.17 12 12 3.17 20.83 12 12 20.83zM12 14c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </div>
+            <h1 class="logo-text text-gray-800">CardVerse</h1>
+            <p class="text-gray-500 mt-2">Phygital Game Card</p>
         </div>
+        <div class="space-y-4 mb-8">
+            <button class="btn-social flex items-center justify-center w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M21.35 12.04c0-.79-.07-1.54-.18-2.29H12v4.32h4.94a5.15 5.15 0 01-2.23 3.37v2.8h3.6c2.1-1.94 3.32-4.8 3.32-8.3z"/><path d="M12 20.01c-3.14 0-5.83-1.74-7.29-4.32l3.6-2.8c.84.58 1.96.93 3.69.93 1.83 0 3.35-.6 4.62-1.63L18.4 17.5c-1.3 1.25-3.08 2.01-5.11 2.01z"/><path d="M4.71 12c0-1.02.2-1.98.54-2.86l-3.6-2.8c-.85 1.77-1.33 3.79-1.33 5.66s.48 3.89 1.33 5.66l3.6-2.8c-.34-.88-.54-1.84-.54-2.86z"/><path d="M12 4.01c1.92 0 3.53.64 4.62 1.63L20.21 2c-1.26-1.18-2.94-1.9-4.9-1.9-2.73 0-5.13 1.08-6.93 2.86l3.6 2.8c.95-.58 2.07-.93 3.53-.93z"/></svg>
+                เข้าสู่ระบบด้วย Google
+            </button>
+            <button class="btn-social flex items-center justify-center w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.35C0 23.407.593 24 1.325 24h11.233V14.734h-3.834v-4.42h3.834V7.237c0-3.805 2.327-5.875 5.705-5.875 1.624 0 3.02.12 3.424.175v3.944l-2.336.001c-1.835 0-2.187.873-2.187 2.152v2.812h4.373l-.57 4.42h-3.803V24h6.006c.732 0 1.325-.593 1.325-1.325V1.325C24 .593 23.407 0 22.675 0z"/></svg>
+                เข้าสู่ระบบด้วย Facebook
+            </button>
+        </div>
+        <div class="relative flex items-center mb-6">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="flex-shrink mx-4 text-gray-400 text-sm">หรือ</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+        <form id="login-form">
+            <div class="space-y-4">
+                <input type="text" id="username" placeholder="ชื่อผู้ใช้" class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                <input type="password" id="password" placeholder="รหัสผ่าน" class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+            </div>
+            <button type="submit" class="w-full mt-6 py-3 px-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-xl shadow-md">
+                เข้าสู่ระบบ
+            </button>
+        </form>
+        <div class="mt-6 text-gray-500 text-sm">
+            <span>ยังไม่มีบัญชีใช่ไหม?</span>
+            <a href="#" class="text-blue-500 hover:text-blue-600 font-semibold">ลงทะเบียนที่นี่</a>
+        </div>
+    </div>
 
-        <div id="collection-screen" class="screen">
-            <h2>คอลเลคชั่นของฉัน</h2>
-            <div id="card-list" class="card-grid">
-                </div>
-            <div class="collection-menu">
-                <button id="home-btn">หน้าหลัก</button>
-                <button id="collection-btn">คอลเลคชั่น</button>
-                <button id="add-card-menu-btn">เพิ่มการ์ด</button>
-                <button id="profile-btn">โปรไฟล์</button>
+    <div id="collection-screen" class="bg-gray-100 min-h-screen flex flex-col font-inter w-full" style="display: none;">
+        <header class="p-4 bg-gray-900 text-white shadow-lg text-center">
+            <h1 class="text-xl font-bold">คอลเล็กชันของฉัน</h1>
+        </header>
+        <main id="card-grid" class="flex-grow p-4 pb-20 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            </main>
+        <button id="scan-button-collection" class="fixed bottom-24 right-4 z-50 p-4 bg-gray-900 text-white rounded-full shadow-2xl flex items-center justify-center transform transition-transform hover:scale-110">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M3 17v2a2 2 0 0 0 2 2h2"/></svg>
+        </button>
+        <div id="card-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50" style="display: none;">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm relative">
+                <button id="close-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+                <div id="modal-content" class="text-center">
+                    </div>
             </div>
         </div>
-
-        <div id="add-card-screen" class="screen">
-    <h2>เพิ่มการ์ด</h2>
-    <button id="nfc-scan-btn">แตะเพื่อสแกนการ์ด (บนอุปกรณ์ที่รองรับ)</button>
-    <p>หรือ</p>
-    <input type="text" id="serial-input" placeholder="กรอกรหัสการ์ดด้วยตนเอง">
-    <button id="manual-lookup-btn">ดึงข้อมูลการ์ด</button>
-    <p id="status-message"></p>
-    <button id="back-to-collection-btn">กลับไปคอลเลคชั่น</button>
-</div>
-
-        <div id="card-detail-screen" class="screen">
-            <div class="card-container">
-                <div id="card-display" class="card-display">
-                    <img id="card-image" src="" alt="Card Image">
-                    <div class="card-details">
-                        <div class="card-header">
-                            <h2 id="card-name"></h2>
-                            <p id="card-rarity"></p>
-                        </div>
-                        <p id="card-token-id"></p>
-                        <p id="card-description"></p>
-                        <div class="card-stats">
-                            <div class="stat-item">
-                                <strong>Attack</strong>
-                                <span id="card-attack"></span>
-                            </div>
-                            <div class="stat-item">
-                                <strong>Defense</strong>
-                                <span id="card-defense"></span>
-                            </div>
-                            <div class="stat-item">
-                                <strong>Cost</strong>
-                                <span id="card-cost"></span>
-                            </div>
-                        </div>
-                    </div>
+        <nav class="fixed bottom-0 left-0 right-0 bg-gray-900 shadow-2xl z-40">
+            <div class="flex justify-around items-center h-16">
+                <div id="nav-home" class="flex flex-col items-center text-white opacity-50 cursor-pointer hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span class="text-xs mt-1">หน้าหลัก</span>
                 </div>
-                <button id="close-detail-btn">กลับ</button>
+                <div id="nav-collection" class="flex flex-col items-center text-white cursor-pointer hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grid"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+                    <span class="text-xs mt-1 font-semibold">คอลเล็กชัน</span>
+                </div>
+                <div id="nav-store" class="flex flex-col items-center text-white opacity-50 cursor-pointer hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store"><path d="m14 16v-4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4"/><path d="M22 7H2"/><path d="M22 13H2"/><path d="M12 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 3v4a3 3 0 0 0-3 3v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2a3 3 0 0 0-3-3V3"/></svg>
+                    <span class="text-xs mt-1">ตลาดซื้อขาย</span>
+                </div>
+                <div id="nav-profile" class="flex flex-col items-center text-white opacity-50 cursor-pointer hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span class="text-xs mt-1">โปรไฟล์</span>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div id="nfc-screen" class="flex items-center justify-center min-h-screen p-4 w-full" style="display: none;">
+        <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-lg text-center space-y-6">
+            <h1 class="text-3xl font-bold text-gray-800">CardVerse PoC: ทดสอบระบบ NFC</h1>
+            <p class="text-gray-600">กดปุ่มด้านล่างเพื่อเริ่มสแกนการ์ดจริงด้วยชิป NFC</p>
+            <button id="scan-button-nfc" class="w-full py-4 px-6 bg-gray-900 text-white font-semibold rounded-xl shadow-lg hover:bg-gray-700 transition-colors">
+                แตะเพื่อสแกนการ์ด
+            </button>
+            <div id="messageBox" class="hidden p-4 rounded-xl text-center text-sm font-medium" role="alert"></div>
+            <div id="cardDisplay" class="hidden p-6 bg-gray-100 rounded-xl text-left border-2 border-dashed border-gray-300">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">ข้อมูลการ์ดที่สแกนได้</h2>
+                <div id="cardInfo" class="space-y-2"></div>
             </div>
         </div>
     </div>
-    
+
     <script>
-        // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
-  authDomain: "cardverse-mvp.firebaseapp.com",
-  projectId: "cardverse-mvp",
-  storageBucket: "cardverse-mvp.firebasestorage.app",
-  messagingSenderId: "787364486859",
-  appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
-  measurementId: "G-WHQ7CV91X0"
-};
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Page Elements ---
+            const loginScreen = document.getElementById('login-screen');
+            const collectionScreen = document.getElementById('collection-screen');
+            const nfcScreen = document.getElementById('nfc-screen');
 
-        //--- DOM Elements ---
-        const loginScreen = document.getElementById('login-screen');
-        const collectionScreen = document.getElementById('collection-screen');
-        const addCardScreen = document.getElementById('add-card-screen');
-        const cardDetailScreen = document.getElementById('card-detail-screen');
+            // Login Page
+            const loginForm = document.getElementById('login-form');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
 
-        const loginBtn = document.getElementById('login-btn');
-        const cardList = document.getElementById('card-list');
-        const cardImage = document.getElementById('card-image');
-        const cardName = document.getElementById('card-name');
-        const cardRarity = document.getElementById('card-rarity');
-        const cardTokenId = document.getElementById('card-token-id');
-        const cardDescription = document.getElementById('card-description');
-        const cardAttack = document.getElementById('card-attack');
-        const cardDefense = document.getElementById('card-defense');
-        const cardCost = document.getElementById('card-cost');
-        const closeDetailBtn = document.getElementById('close-detail-btn');
-        const addCardMenuBtn = document.getElementById('add-card-menu-btn');
-        const backToCollectionBtn = document.getElementById('back-to-collection-btn');
-        const manualLookupBtn = document.getElementById('manual-lookup-btn');
-        const serialInput = document.getElementById('serial-input');
-        const statusMessage = document.getElementById('status-message');
-        const addCardScreen = document.getElementById('add-card-screen');
-const addCardMenuBtn = document.getElementById('add-card-menu-btn');
-const backToCollectionBtn = document.getElementById('back-to-collection-btn');
-const nfcScanBtn = document.getElementById('nfc-scan-btn');
-const manualLookupBtn = document.getElementById('manual-lookup-btn');
-const serialInput = document.getElementById('serial-input');
-const statusMessage = document.getElementById('status-message');
+            // Collection Page
+            const cardGrid = document.getElementById('card-grid');
+            const scanButtonCollection = document.getElementById('scan-button-collection');
+            const cardModal = document.getElementById('card-modal');
+            const closeModalButton = document.getElementById('close-modal');
+            const modalContent = document.getElementById('modal-content');
 
-        //--- Main Functions ---
-        // --- NFC Scan Function ---
-async function nfcScan() {
-    if ('NDEFReader' in window) {
-        try {
-            statusMessage.innerText = 'แตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
-            const reader = new NDEFReader();
-            await reader.scan();
+            // NFC Scan Page
+            const scanButtonNFC = document.getElementById('scan-button-nfc');
+            const messageBox = document.getElementById('messageBox');
+            const cardDisplay = document.getElementById('cardDisplay');
+            const cardInfo = document.getElementById('cardInfo');
 
-            reader.addEventListener("reading", ({ serialNumber }) => {
-                statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
-                console.log("Serial Number:", serialNumber);
-                getCardData(serialNumber);
-            });
-        } catch (error) {
-            statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC: กรุณาลองใหม่อีกครั้ง';
-            console.error("NFC Scan Error:", error);
-        }
-    } else {
-        statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
-    }
-}
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
-        }
+            // Navigation
+            const navHome = document.getElementById('nav-home');
+            const navCollection = document.getElementById('nav-collection');
+            const navStore = document.getElementById('nav-store');
+            const navProfile = document.getElementById('nav-profile');
 
-        function fetchAndRenderCards() {
-            db.collection("cards").get()
-                .then((querySnapshot) => {
-                    cardList.innerHTML = '';
-                    querySnapshot.forEach((doc) => {
-                        const cardData = doc.data();
-                        const cardElement = document.createElement('div');
-                        cardElement.className = 'card-thumbnail';
-                        cardElement.dataset.serialNumber = cardData.serial_number;
-                        
-                        cardElement.innerHTML = `
-                            <img src="${cardData.image_url}" alt="${cardData.name}">
-                            <h3>${cardData.name}</h3>
-                            <p>${cardData.rarity}</p>
-                        `;
-                        
-                        cardElement.addEventListener('click', () => {
-                            getCardData(cardData.serial_number);
-                        });
-                        cardList.appendChild(cardElement);
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error fetching cards:", error);
-                    alert("ไม่สามารถดึงคอลเลคชั่นได้");
+            // --- Mock Data ---
+            const mockCards = [
+                { id: 1, name: 'นักรบแห่งรุ่งอรุณ', image: 'https://placehold.co/300x400/2c3e50/ecf0f1?text=Warrior+of+Dawn', description: 'นักรบผู้กล้าหาญที่นำแสงสว่างมาสู่สมรภูมิ', power: 'ATK: 500, DEF: 400', rarity: 'Common', tokenId: '0x1A2B3C4D' },
+                { id: 2, name: 'จอมเวทย์เงา', image: 'https://placehold.co/300x400/2c3e50/ecf0f1?text=Shadow+Mage', description: 'ผู้ควบคุมพลังแห่งความมืดและมายา', power: 'ATK: 300, DEF: 600', rarity: 'Rare', tokenId: '0x5E6F7G8H' },
+                { id: 3, name: 'อัศวินมังกร', image: 'https://placehold.co/300x400/2c3e50/ecf0f1?text=Dragon+Knight', description: 'ผู้พิชิตที่ขี่มังกรในตำนาน', power: 'ATK: 700, DEF: 700', rarity: 'Epic', tokenId: '0x9I1J2K3L' },
+                { id: 4, name: 'ผู้พิทักษ์แห่งผืนป่า', image: 'https://placehold.co/300x400/2c3e50/ecf0f1?text=Forest+Guardian', description: 'วิญญาณแห่งธรรมชาติที่คอยปกป้องชีวิต', power: 'ATK: 200, DEF: 800', rarity: 'Common', tokenId: '0x4M5N6O7P' },
+                { id: 5, name: 'นักล่าแห่งพายุ', image: 'https://placehold.co/300x400/2c3e50/ecf0f1?text=Storm+Hunter', description: 'นักล่าผู้รวดเร็วดุจสายฟ้า', power: 'ATK: 600, DEF: 300', rarity: 'Rare', tokenId: '0x8Q9R1S2T' },
+                { id: 6, name: 'เทพธิดาแห่งแสง', image: 'https://placehold.co/300x400/2c3e50/ecf0f1?text=Goddess+of+Light', description: 'พลังศักดิ์สิทธิ์ที่รักษาและมอบพร', power: 'ATK: 100, DEF: 900', rarity: 'Legendary', tokenId: '0x3U4V5W6X' },
+                { id: 7, name: 'ผู้บงการแห่งกาลเวลา', image: 'https://placehold.co/300x400/2c3e50/ecf0f1?text=Time+Manipulator', description: 'ควบคุมเวลาเพื่อพลิกเกม', power: 'ATK: 450, DEF: 450', rarity: 'Rare', tokenId: '0x7Y8Z9A1B' },
+                { id: 8, name: 'อสูรแห่งความโกลาหล', image: 'https://placehold.co/300x400/2c3e50/ecf0f1?text=Chaos+Demon', description: 'ปีศาจที่สร้างความวุ่นวาย', power: 'ATK: 800, DEF: 200', rarity: 'Epic', tokenId: '0x2C3D4E5F' },
+            ];
+
+            // --- Functions ---
+            const showScreen = (screenToShow) => {
+                loginScreen.style.display = 'none';
+                collectionScreen.style.display = 'none';
+                nfcScreen.style.display = 'none';
+                screenToShow.style.display = 'flex';
+            };
+
+            const renderCardGrid = () => {
+                cardGrid.innerHTML = '';
+                mockCards.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105';
+                    cardElement.innerHTML = `
+                        <img src="${card.image}" alt="${card.name}" class="w-full h-auto object-cover"/>
+                        <div class="p-2 text-center">
+                            <h3 class="text-sm font-semibold truncate">${card.name}</h3>
+                        </div>
+                    `;
+                    cardElement.addEventListener('click', () => openCardDetails(card));
+                    cardGrid.appendChild(cardElement);
                 });
-        }
+            };
 
-        function getCardData(serialNumber) {
-            statusMessage.innerText = 'กำลังดึงข้อมูลการ์ด...';
-            db.collection("cards").where("serial_number", "==", serialNumber).get()
-                .then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        const doc = querySnapshot.docs[0];
-                        const cardData = doc.data();
-                        
-                        cardImage.src = cardData.image_url;
-                        cardImage.alt = cardData.name;
-                        cardName.innerText = cardData.name;
-                        cardRarity.innerText = `ระดับ: ${cardData.rarity}`;
-                        cardDescription.innerText = cardData.description;
-                        cardTokenId.innerText = `Token ID: ${cardData.token_id}`;
+            const openCardDetails = (card) => {
+                modalContent.innerHTML = `
+                    <img src="${card.image}" alt="${card.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md"/>
+                    <h3 class="text-2xl font-bold mb-2">${card.name}</h3>
+                    <p class="text-sm text-gray-600 mb-4">${card.description}</p>
+                    <div class="bg-gray-100 p-4 rounded-xl text-left">
+                        <p class="text-sm"><b>ค่าพลัง:</b> ${card.power}</p>
+                        <p class="text-sm"><b>ระดับ:</b> ${card.rarity}</p>
+                        <p class="text-sm"><b>Token ID:</b> ${card.tokenId}</p>
+                    </div>
+                `;
+                cardModal.style.display = 'flex';
+            };
 
-                        if (cardData.stats) {
-                            cardAttack.innerText = cardData.stats.attack;
-                            cardDefense.innerText = cardData.stats.defense;
-                            cardCost.innerText = cardData.stats.cost;
-                        }
-                        
-                        showScreen('card-detail-screen');
-                        statusMessage.innerText = '';
-                    } else {
-                        statusMessage.innerText = `ไม่พบข้อมูลการ์ดสำหรับ serial number: ${serialNumber}`;
-                        setTimeout(() => {
-                            statusMessage.innerText = '';
-                        }, 3000);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error getting document:", error);
-                    statusMessage.innerText = 'เกิดข้อผิดพลาดในการดึงข้อมูล';
-                    setTimeout(() => {
-                        statusMessage.innerText = '';
-                    }, 3000);
-                });
-        }
-        
-        // --- NFC Scan Function ---
-        async function nfcScan() {
-            if ('NDEFReader' in window) {
-                try {
-                    statusMessage.innerText = 'แตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
-                    const reader = new NDEFReader();
-                    await reader.scan();
-
-                    reader.addEventListener("reading", ({ serialNumber }) => {
-                        statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
-                        console.log("Serial Number:", serialNumber);
-                        getCardData(serialNumber);
-                    });
-                } catch (error) {
-                    statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC: กรุณาลองใหม่อีกครั้ง';
-                    console.error("NFC Scan Error:", error);
+            const showMessage = (text, type = 'info') => {
+                messageBox.textContent = text;
+                messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+                if (type === 'error') {
+                    messageBox.classList.add('bg-red-100', 'text-red-700');
+                } else if (type === 'success') {
+                    messageBox.classList.add('bg-green-100', 'text-green-700');
+                } else {
+                    messageBox.classList.add('bg-blue-100', 'text-blue-700');
                 }
-            } else {
-                statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
-            }
-        }
+            };
 
-        //--- Event Listeners ---
-        addCardMenuBtn.addEventListener('click', () => {
-    showScreen('add-card-screen');
-    statusMessage.innerText = '';
-    serialInput.value = '';
-});
+            const displayScannedCardData = (data) => {
+                cardInfo.innerHTML = '';
+                cardDisplay.classList.remove('hidden');
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal">${data.name}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">รายละเอียด: <span class="font-normal">${data.description}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">ค่าพลัง: <span class="font-normal">${data.power}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">ระดับ: <span class="font-normal">${data.rarity}</span></p>`;
+                cardInfo.innerHTML += `<p class="text-lg font-semibold">สถานะการเป็นเจ้าของ (Token ID): <span class="font-normal">${data.tokenId}</span></p>`;
+                showMessage('สแกนสำเร็จ!', 'success');
+            };
 
-backToCollectionBtn.addEventListener('click', () => {
-    showScreen('collection-screen');
-});
-
-nfcScanBtn.addEventListener('click', nfcScan);
-
-manualLookupBtn.addEventListener('click', () => {
-    const serialNumber = serialInput.value.trim();
-    if (serialNumber) {
-        getCardData(serialNumber);
-    } else {
-        statusMessage.innerText = 'กรุณากรอกรหัสการ์ด';
-    }
-});
-        loginBtn.addEventListener('click', () => {
-    // เปลี่ยนจาก 'login-screen' เป็น 'collection-screen'
-    showScreen('collection-screen');
-    fetchAndRenderCards();
-});
-
-        closeDetailBtn.addEventListener('click', () => {
-            showScreen('collection-screen');
-        });
-
-        addCardMenuBtn.addEventListener('click', () => {
-    showScreen('add-card-screen');
-    statusMessage.innerText = '';
-    serialInput.value = '';
-});
-
-backToCollectionBtn.addEventListener('click', () => {
-    showScreen('collection-screen');
-});
-
-manualLookupBtn.addEventListener('click', () => {
-    const serialNumber = serialInput.value.trim();
-    if (serialNumber) {
-        getCardData(serialNumber);
-    } else {
-        statusMessage.innerText = 'กรุณากรอกรหัสการ์ด';
-    }
-});
-
-// ส่วนของ NFC scan
-nfcScanBtn.addEventListener('click', () => {
-  // เรียกใช้ฟังก์ชัน nfcScan
-    async function nfcScan() {
-    if ('NDEFReader' in window) {
-        try {
-            statusMessage.innerText = 'แตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
-            const reader = new NDEFReader();
-            await reader.scan();
-
-            reader.addEventListener("reading", ({ serialNumber }) => {
-                statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
-                console.log("Serial Number:", serialNumber);
-                getCardData(serialNumber);
+            // --- Event Listeners ---
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Simulate login
+                if (usernameInput.value && passwordInput.value) {
+                    showScreen(collectionScreen);
+                    renderCardGrid();
+                } else {
+                    alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+                }
             });
-        } catch (error) {
-            statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC: กรุณาลองใหม่อีกครั้ง';
-            console.error("NFC Scan Error:", error);
-        }
-    } else {
-        statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
-    }
-}
-});
+
+            closeModalButton.addEventListener('click', () => {
+                cardModal.style.display = 'none';
+            });
+
+            scanButtonCollection.addEventListener('click', () => {
+                showScreen(nfcScreen);
+            });
+
+            scanButtonNFC.addEventListener('click', () => {
+                showMessage('กำลังสแกนการ์ด... กรุณาแตะการ์ดที่ด้านหลังอุปกรณ์', 'info');
+                cardDisplay.classList.add('hidden');
+                cardInfo.innerHTML = '';
+                
+                setTimeout(() => {
+                    // Simulate a successful scan
+                    const randomCard = mockCards[Math.floor(Math.random() * mockCards.length)];
+                    displayScannedCardData(randomCard);
+                }, 2000); // 2-second delay
+            });
+
+            // Navigation
+            navCollection.addEventListener('click', () => {
+                showScreen(collectionScreen);
+                renderCardGrid();
+            });
+            navHome.addEventListener('click', () => { showScreen(collectionScreen); renderCardGrid(); }); // For demo, Home button goes to collection
+            navStore.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
+            navProfile.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
+        });
     </script>
 </body>
 </html>
