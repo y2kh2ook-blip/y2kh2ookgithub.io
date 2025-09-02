@@ -544,6 +544,26 @@ manualLookupBtn.addEventListener('click', () => {
 // ส่วนของ NFC scan
 nfcScanBtn.addEventListener('click', () => {
   // เรียกใช้ฟังก์ชัน nfcScan
+    async function nfcScan() {
+    if ('NDEFReader' in window) {
+        try {
+            statusMessage.innerText = 'แตะการ์ด NFC บนด้านหลังโทรศัพท์ของคุณ...';
+            const reader = new NDEFReader();
+            await reader.scan();
+
+            reader.addEventListener("reading", ({ serialNumber }) => {
+                statusMessage.innerText = `อ่านรหัส NFC ได้แล้ว: ${serialNumber}`;
+                console.log("Serial Number:", serialNumber);
+                getCardData(serialNumber);
+            });
+        } catch (error) {
+            statusMessage.innerText = 'เกิดข้อผิดพลาดในการสแกน NFC: กรุณาลองใหม่อีกครั้ง';
+            console.error("NFC Scan Error:", error);
+        }
+    } else {
+        statusMessage.innerText = 'เบราว์เซอร์ของคุณไม่รองรับการสแกน NFC';
+    }
+}
 });
     </script>
 </body>
