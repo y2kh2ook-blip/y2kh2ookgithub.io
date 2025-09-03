@@ -32,54 +32,39 @@
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
+        .page-container {
+            display: none;
+            min-height: 100vh;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
 
-    <div id="login-screen" class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md mx-4 sm:mx-6 md:mx-auto text-center" style="display: block;">
-        <div class="mb-8">
-            <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 12l10 10 10-10L12 2zm0 18.83L3.17 12 12 3.17 20.83 12 12 20.83zM12 14c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+    <div id="login-screen" class="page-container flex items-center justify-center w-full" style="display: flex;">
+        <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md mx-4 sm:mx-6 md:mx-auto text-center">
+            <div class="mb-8">
+                <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 12l10 10 10-10L12 2zm0 18.83L3.17 12 12 3.17 20.83 12 12 20.83zM12 14c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </div>
+                <h1 class="logo-text text-gray-800">CardVerse</h1>
+                <p class="text-gray-500 mt-2">Phygital Game Card</p>
             </div>
-            <h1 class="logo-text text-gray-800">CardVerse</h1>
-            <p class="text-gray-500 mt-2">Phygital Game Card</p>
-        </div>
-        <div class="space-y-4 mb-8">
-            <button class="btn-social flex items-center justify-center w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-md">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M21.35 12.04c0-.79-.07-1.54-.18-2.29H12v4.32h4.94a5.15 5.15 0 01-2.23 3.37v2.8h3.6c2.1-1.94 3.32-4.8 3.32-8.3z"/><path d="M12 20.01c-3.14 0-5.83-1.74-7.29-4.32l3.6-2.8c.84.58 1.96.93 3.69.93 1.83 0 3.35-.6 4.62-1.63L18.4 17.5c-1.3 1.25-3.08 2.01-5.11 2.01z"/><path d="M4.71 12c0-1.02.2-1.98.54-2.86l-3.6-2.8c-.85 1.77-1.33 3.79-1.33 5.66s.48 3.89 1.33 5.66l3.6-2.8c-.34-.88-.54-1.84-.54-2.86z"/><path d="M12 4.01c1.92 0 3.53.64 4.62 1.63L20.21 2c-1.26-1.18-2.94-1.9-4.9-1.9-2.73 0-5.13 1.08-6.93 2.86l3.6 2.8c.95-.58 2.07-.93 3.53-.93z"/></svg>
-                เข้าสู่ระบบด้วย Google
-            </button>
-            <button class="btn-social flex items-center justify-center w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.35C0 23.407.593 24 1.325 24h11.233V14.734h-3.834v-4.42h3.834V7.237c0-3.805 2.327-5.875 5.705-5.875 1.624 0 3.02.12 3.424.175v3.944l-2.336.001c-1.835 0-2.187.873-2.187 2.152v2.812h4.373l-.57 4.42h-3.803V24h6.006c.732 0 1.325-.593 1.325-1.325V1.325C24 .593 23.407 0 22.675 0z"/></svg>
-                เข้าสู่ระบบด้วย Facebook
-            </button>
-        </div>
-        <div class="relative flex items-center mb-6">
-            <div class="flex-grow border-t border-gray-300"></div>
-            <span class="flex-shrink mx-4 text-gray-400 text-sm">หรือ</span>
-            <div class="flex-grow border-t border-gray-300"></div>
-        </div>
-        <form id="login-form">
-            <div class="space-y-4">
-                <input type="text" id="username-input" placeholder="ชื่อผู้ใช้" class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
-                <input type="password" id="password-input" placeholder="รหัสผ่าน" class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+            <div class="space-y-4 mb-8">
+                <button id="google-login-btn" class="btn-social flex items-center justify-center w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M21.35 12.04c0-.79-.07-1.54-.18-2.29H12v4.32h4.94a5.15 5.15 0 01-2.23 3.37v2.8h3.6c2.1-1.94 3.32-4.8 3.32-8.3z"/><path d="M12 20.01c-3.14 0-5.83-1.74-7.29-4.32l3.6-2.8c.84.58 1.96.93 3.69.93 1.83 0 3.35-.6 4.62-1.63L18.4 17.5c-1.3 1.25-3.08 2.01-5.11 2.01z"/><path d="M4.71 12c0-1.02.2-1.98.54-2.86l-3.6-2.8c-.85 1.77-1.33 3.79-1.33 5.66s.48 3.89 1.33 5.66l3.6-2.8c-.34-.88-.54-1.84-.54-2.86z"/><path d="M12 4.01c1.92 0 3.53.64 4.62 1.63L20.21 2c-1.26-1.18-2.94-1.9-4.9-1.9-2.73 0-5.13 1.08-6.93 2.86l3.6 2.8c.95-.58 2.07-.93 3.53-.93z"/></svg>
+                    เข้าสู่ระบบด้วย Google
+                </button>
             </div>
-            <button type="submit" class="w-full mt-6 py-3 px-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-xl shadow-md">
-                เข้าสู่ระบบ
-            </button>
-        </form>
-        <div class="mt-6 text-gray-500 text-sm">
-            <span>ยังไม่มีบัญชีใช่ไหม?</span>
-            <a href="#" class="text-blue-500 hover:text-blue-600 font-semibold">ลงทะเบียนที่นี่</a>
+            <p class="text-gray-500 text-sm">ปัจจุบันเป็นเวอร์ชันทดสอบ จึงใช้งานได้เฉพาะฟังก์ชันบางอย่าง</p>
         </div>
     </div>
 
-    <div id="collection-screen" class="bg-gray-100 min-h-screen flex flex-col font-inter w-full" style="display: none;">
+    <div id="collection-screen" class="page-container flex-col font-inter w-full">
         <header class="p-4 bg-gray-900 text-white shadow-lg text-center">
             <h1 class="text-xl font-bold">คอลเล็กชันของฉัน</h1>
         </header>
         <main id="card-grid" class="flex-grow p-4 pb-20 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <div id="loading-message" class="col-span-full text-center text-gray-500 mt-8">กำลังโหลดข้อมูลการ์ด...</div>
+            <div id="loading-message-collection" class="col-span-full text-center text-gray-500 mt-8">กำลังโหลดข้อมูลการ์ด...</div>
         </main>
         <button id="scan-button-collection" class="fixed bottom-24 right-4 z-50 p-4 bg-gray-900 text-white rounded-full shadow-2xl flex items-center justify-center transform transition-transform hover:scale-110">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M3 17v2a2 2 0 0 0 2 2h2"/></svg>
@@ -106,10 +91,10 @@
         </nav>
     </div>
 
-    <div id="nfc-screen" class="flex items-center justify-center min-h-screen p-4 w-full hidden">
+    <div id="nfc-screen" class="page-container flex items-center justify-center p-4 w-full">
         <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-lg text-center space-y-6">
             <h1 class="text-3xl font-bold text-gray-800">CardVerse PoC: ทดสอบระบบ NFC</h1>
-            <p class="text-gray-600">กดปุ่มด้านล่างเพื่อเริ่มสแกนการ์ดจริงด้วยชิป NFC</p>
+            <p class="text-gray-600">กดปุ่มด้านล่างเพื่อเพิ่มการ์ดเข้าคอลเล็กชัน หรือกรอก Serial Number</p>
             <div class="space-y-4">
                 <input type="text" id="serialNumberInput" placeholder="กรอก Serial Number" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
                 <button id="submitSerialButton" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-colors">
@@ -132,95 +117,133 @@
         </div>
     </div>
     
-    <div id="marketplace-screen" class="hidden min-h-screen p-4 bg-gray-100">
-        <div class="container mx-auto">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">ตลาดซื้อขาย</h2>
+    <div id="marketplace-screen" class="page-container flex-col min-h-screen p-4 bg-gray-100">
+        <header class="p-4 bg-gray-900 text-white shadow-lg text-center">
+            <h2 class="text-xl font-bold">ตลาดซื้อขาย</h2>
+        </header>
+        <div class="container mx-auto pt-4 pb-20">
             <div id="marketplace-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div id="loading-message-marketplace" class="col-span-full text-center text-gray-500 mt-8">กำลังโหลดข้อมูลการ์ด...</div>
             </div>
-            <div id="loading-message-marketplace" class="col-span-full text-center text-gray-500 mt-8">กำลังโหลดข้อมูลการ์ด...</div>
         </div>
+        <nav class="fixed bottom-0 left-0 right-0 bg-gray-900 shadow-2xl z-40">
+            <div class="flex justify-around items-center h-16">
+                <div id="nav-home-m" class="flex flex-col items-center text-white opacity-50 cursor-pointer hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span class="text-xs mt-1">หน้าหลัก</span>
+                </div>
+                <div id="nav-collection-m" class="flex flex-col items-center text-white cursor-pointer opacity-50 hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grid"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+                    <span class="text-xs mt-1">คอลเล็กชัน</span>
+                </div>
+                <div id="nav-store-m" class="flex flex-col items-center text-white cursor-pointer hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store"><path d="m14 16v-4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4"/><path d="M22 7H2"/><path d="M22 13H2"/><path d="M12 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 3v4a3 3 0 0 0-3 3v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2a3 3 0 0 0-3-3V3"/></svg>
+                    <span class="text-xs mt-1 font-semibold">ตลาดซื้อขาย</span>
+                </div>
+                <div id="nav-profile-m" class="flex flex-col items-center text-white opacity-50 cursor-pointer hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span class="text-xs mt-1">โปรไฟล์</span>
+                </div>
+            </div>
+        </nav>
     </div>
     
     <div id="card-modal" class="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center hidden">
-        <div class="relative bg-white p-6 rounded-xl w-11/12 md:w-1/2 lg:w-1/3 shadow-xl">
+        <div class="relative bg-white p-6 rounded-xl w-11/12 md:w-1/2 lg:w-1/3 shadow-xl max-h-[90vh] overflow-y-auto">
             <button id="close-modal-button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <div id="modal-content">
-            </div>
+            <div id="modal-content"></div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
-  authDomain: "cardverse-mvp.firebaseapp.com",
-  projectId: "cardverse-mvp",
-  storageBucket: "cardverse-mvp.firebasestorage.app",
-  messagingSenderId: "787364486859",
-  appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
-  measurementId: "G-WHQ7CV91X0"
-};
+            // WARN: This is for development only. Use environment variables in production.
+            const firebaseConfig = {
+                apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
+                authDomain: "cardverse-mvp.firebaseapp.com",
+                projectId: "cardverse-mvp",
+                storageBucket: "cardverse-mvp.firebasestorage.app",
+                messagingSenderId: "787364486859",
+                appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
+                measurementId: "G-WHQ7CV91X0"
+            };
 
-            // Initialize Firebase
             firebase.initializeApp(firebaseConfig);
             const db = firebase.firestore();
 
             // --- Page Elements ---
-            const loginScreen = document.getElementById('login-screen');
-            const collectionScreen = document.getElementById('collection-screen');
-            const nfcScreen = document.getElementById('nfc-screen');
-            const marketplaceScreen = document.getElementById('marketplace-screen');
-            const cardModal = document.getElementById('card-modal');
-            const closeModalButton = document.getElementById('close-modal-button');
-            const modalContent = document.getElementById('modal-content');
+            const screens = {
+                login: document.getElementById('login-screen'),
+                collection: document.getElementById('collection-screen'),
+                nfc: document.getElementById('nfc-screen'),
+                marketplace: document.getElementById('marketplace-screen'),
+                modal: document.getElementById('card-modal')
+            };
 
-            // Login Page
-            const loginForm = document.getElementById('login-form');
-            const usernameInput = document.getElementById('username-input');
-            const passwordInput = document.getElementById('password-input');
+            const elements = {
+                // Login
+                googleLoginBtn: document.getElementById('google-login-btn'),
+                // Collection
+                cardGrid: document.getElementById('card-grid'),
+                loadingMessageCollection: document.getElementById('loading-message-collection'),
+                // NFC
+                serialNumberInput: document.getElementById('serialNumberInput'),
+                submitSerialButton: document.getElementById('submitSerialButton'),
+                scanButtonNFC: document.getElementById('scan-button-nfc'),
+                messageBox: document.getElementById('messageBox'),
+                cardDisplay: document.getElementById('cardDisplay'),
+                cardInfo: document.getElementById('cardInfo'),
+                scanButtonCollection: document.getElementById('scan-button-collection'),
+                // Marketplace
+                marketplaceGrid: document.getElementById('marketplace-grid'),
+                loadingMessageMarketplace: document.getElementById('loading-message-marketplace'),
+                // Modal
+                closeModalButton: document.getElementById('close-modal-button'),
+                modalContent: document.getElementById('modal-content'),
+                // Nav
+                navHome: document.getElementById('nav-home'),
+                navCollection: document.getElementById('nav-collection'),
+                navStore: document.getElementById('nav-store'),
+                navProfile: document.getElementById('nav-profile'),
+                navHomeM: document.getElementById('nav-home-m'),
+                navCollectionM: document.getElementById('nav-collection-m'),
+                navStoreM: document.getElementById('nav-store-m'),
+                navProfileM: document.getElementById('nav-profile-m')
+            };
             
-            // Collection Page
-            const cardGrid = document.getElementById('card-grid');
-            const scanButtonCollection = document.getElementById('scan-button-collection');
-            const loadingMessageCollection = document.getElementById('loading-message');
-
-            // NFC Scan Page
-            const serialNumberInput = document.getElementById('serialNumberInput');
-            const submitSerialButton = document.getElementById('submitSerialButton');
-            const scanButtonNFC = document.getElementById('scan-button-nfc');
-            const messageBox = document.getElementById('messageBox');
-            const cardDisplay = document.getElementById('cardDisplay');
-            const cardInfo = document.getElementById('cardInfo');
-
-            // Marketplace Page
-            const marketplaceGrid = document.getElementById('marketplace-grid');
-            const loadingMessageMarketplace = document.getElementById('loading-message-marketplace');
-
-            // Navigation
-            const navHome = document.getElementById('nav-home');
-            const navCollection = document.getElementById('nav-collection');
-            const navStore = document.getElementById('nav-store');
-            const navProfile = document.getElementById('nav-profile');
-
-            let allCardsData = [];
+            let currentUserId = null;
 
             // --- Reusable Functions ---
-            const showScreen = (screenToShow) => {
-                const screens = [loginScreen, collectionScreen, nfcScreen, marketplaceScreen];
-                screens.forEach(screen => screen.style.display = 'none');
-                screenToShow.style.display = 'flex';
+            const showScreen = (screenName) => {
+                Object.values(screens).forEach(screen => screen.style.display = 'none');
+                if (screens[screenName]) {
+                    screens[screenName].style.display = 'flex';
+                }
+            };
+            
+            const setActiveNav = (navItem) => {
+                const allNavs = [elements.navHome, elements.navCollection, elements.navStore, elements.navProfile, elements.navHomeM, elements.navCollectionM, elements.navStoreM, elements.navProfileM];
+                allNavs.forEach(nav => {
+                    if (nav) {
+                        nav.classList.add('opacity-50');
+                        nav.classList.remove('font-semibold');
+                    }
+                });
+                if (navItem) {
+                    navItem.classList.remove('opacity-50');
+                    navItem.classList.add('font-semibold');
+                }
             };
 
             const showMessage = (text, type = 'info') => {
-                messageBox.textContent = text;
-                messageBox.className = `p-4 rounded-xl text-center text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
-                messageBox.style.display = 'block';
+                elements.messageBox.textContent = text;
+                elements.messageBox.className = `p-4 rounded-xl text-center text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+                elements.messageBox.style.display = 'block';
             };
             
             const renderCardGrid = (data, element, isMarketplace = false) => {
@@ -244,7 +267,7 @@ const firebaseConfig = {
             };
 
             const openCardDetails = (card, isMarketplace) => {
-                modalContent.innerHTML = `
+                elements.modalContent.innerHTML = `
                     <h3 class="text-2xl font-bold mb-4 text-yellow-600">${card.name}</h3>
                     <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg border-4 border-amber-400"/>
                     <p class="text-sm text-gray-800 mt-4 mb-4">${card.description}</p>
@@ -255,22 +278,22 @@ const firebaseConfig = {
                     </div>
                     ${isMarketplace ? `<button id="buy-card-button" class="w-full mt-4 py-2 px-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">ซื้อการ์ด</button>` : ''}
                 `;
-                cardModal.style.display = 'flex';
+                screens.modal.style.display = 'flex';
                 
                 if (isMarketplace) {
-                    document.getElementById('buy-card-button').addEventListener('click', () => {
-                        buyCard(card);
-                    });
+                    const buyButton = document.getElementById('buy-card-button');
+                    if (buyButton) {
+                        buyButton.addEventListener('click', () => buyCard(card));
+                    }
                 }
             };
             
             // --- Firebase Data Functions ---
             const fetchUserCards = async () => {
-                loadingMessageCollection.style.display = 'block';
-                const currentUserId = sessionStorage.getItem('currentUserId');
+                elements.loadingMessageCollection.style.display = 'block';
                 if (!currentUserId) {
-                    showScreen(loginScreen);
-                    loadingMessageCollection.style.display = 'none';
+                    showScreen('login');
+                    elements.loadingMessageCollection.style.display = 'none';
                     return;
                 }
                 try {
@@ -279,34 +302,33 @@ const firebaseConfig = {
                         id: doc.id,
                         ...doc.data()
                     }));
-                    renderCardGrid(cardsData, cardGrid);
+                    renderCardGrid(cardsData, elements.cardGrid);
                 } catch (error) {
                     console.error("Error fetching user cards: ", error);
-                    cardGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถดึงข้อมูลคอลเล็กชันได้: ${error.message}</div>`;
+                    elements.cardGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถดึงข้อมูลคอลเล็กชันได้: ${error.message}</div>`;
                 } finally {
-                    loadingMessageCollection.style.display = 'none';
+                    elements.loadingMessageCollection.style.display = 'none';
                 }
             };
 
             const fetchMarketplaceCards = async () => {
-                loadingMessageMarketplace.style.display = 'block';
+                elements.loadingMessageMarketplace.style.display = 'block';
                 try {
                     const allCardsCollection = await db.collection('cards').get();
-                    allCardsData = allCardsCollection.docs.map(doc => ({
+                    const allCardsData = allCardsCollection.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
                     }));
-                    renderCardGrid(allCardsData, marketplaceGrid, true);
+                    renderCardGrid(allCardsData, elements.marketplaceGrid, true);
                 } catch (error) {
                     console.error("Error fetching marketplace cards:", error);
-                    marketplaceGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถโหลดข้อมูลตลาดซื้อขายได้: ${error.message}</div>`;
+                    elements.marketplaceGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถโหลดข้อมูลตลาดซื้อขายได้: ${error.message}</div>`;
                 } finally {
-                    loadingMessageMarketplace.style.display = 'none';
+                    elements.loadingMessageMarketplace.style.display = 'none';
                 }
             };
 
             const addCardToUserCollection = async (cardData) => {
-                const currentUserId = sessionStorage.getItem('currentUserId');
                 if (!currentUserId) {
                     showMessage('กรุณาเข้าสู่ระบบก่อน', 'error');
                     return;
@@ -332,43 +354,30 @@ const firebaseConfig = {
 
             const buyCard = async (cardData) => {
                 await addCardToUserCollection(cardData);
-                cardModal.style.display = 'none';
+                screens.modal.style.display = 'none';
             };
 
             // --- Event Listeners ---
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (usernameInput.value && passwordInput.value) {
-                    const userId = usernameInput.value;
-                    const userRef = db.collection('users').doc(userId);
-                    const userDoc = await userRef.get();
-                    
-                    if (!userDoc.exists) {
-                        await userRef.set({
-                            username: userId,
-                            created_at: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                    sessionStorage.setItem('currentUserId', userId);
-                    showScreen(collectionScreen);
-                    fetchUserCards();
-                } else {
-                    alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
-                }
+            elements.googleLoginBtn.addEventListener('click', () => {
+                // Mock login for demo purposes
+                currentUserId = 'demo_user';
+                sessionStorage.setItem('currentUserId', currentUserId);
+                showScreen('collection');
+                setActiveNav(elements.navCollection);
+                fetchUserCards();
             });
 
-            submitSerialButton.addEventListener('click', async () => {
-                const serialNumber = serialNumberInput.value.trim();
+            elements.submitSerialButton.addEventListener('click', async () => {
+                const serialNumber = elements.serialNumberInput.value.trim();
                 if (serialNumber) {
                     try {
                         const cardDoc = await db.collection('cards').doc(serialNumber).get();
                         if (cardDoc.exists) {
                             const cardData = cardDoc.data();
                             await addCardToUserCollection(cardData);
-                            // Clear input after successful scan/add
-                            serialNumberInput.value = ''; 
-                            cardDisplay.style.display = 'block';
-                            cardInfo.innerHTML = `
+                            elements.serialNumberInput.value = '';
+                            elements.cardDisplay.style.display = 'block';
+                            elements.cardInfo.innerHTML = `
                                 <img src="${cardData.image_url}" alt="${cardData.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md border-4 border-yellow-500"/>
                                 <h3 class="text-2xl font-bold mb-2 text-yellow-600">${cardData.name}</h3>
                                 <p class="text-sm text-gray-800 mb-4">${cardData.description}</p>
@@ -380,6 +389,7 @@ const firebaseConfig = {
                             `;
                         } else {
                             showMessage('ไม่พบ Serial Number นี้ในระบบ', 'error');
+                            elements.cardDisplay.style.display = 'none';
                         }
                     } catch (error) {
                         console.error("Error fetching card by serial number:", error);
@@ -387,50 +397,59 @@ const firebaseConfig = {
                     }
                 } else {
                     showMessage('กรุณากรอก Serial Number', 'error');
+                    elements.cardDisplay.style.display = 'none';
                 }
             });
 
-            closeModalButton.addEventListener('click', () => {
-                cardModal.style.display = 'none';
+            elements.closeModalButton.addEventListener('click', () => {
+                screens.modal.style.display = 'none';
+            });
+            
+            elements.scanButtonCollection.addEventListener('click', () => {
+                showScreen('nfc');
+            });
+            
+            elements.scanButtonNFC.addEventListener('click', () => {
+                // Simulate NFC scan by triggering the serial number submit
+                elements.submitSerialButton.click();
             });
 
-            scanButtonCollection.addEventListener('click', () => {
-                showScreen(nfcScreen);
-            });
-
-            scanButtonNFC.addEventListener('click', () => {
-                // สำหรับการจำลอง NFC, ให้เรียกใช้ปุ่ม "เพิ่มการ์ดด้วย Serial Number"
-                // ในเวอร์ชันจริงจะเปลี่ยนไปใช้โค้ด NFC Web API
-                submitSerialButton.click();
-            });
-
-            navCollection.addEventListener('click', () => {
-                showScreen(collectionScreen);
+            elements.navCollection.addEventListener('click', () => {
+                showScreen('collection');
+                setActiveNav(elements.navCollection);
                 fetchUserCards();
             });
 
-            navStore.addEventListener('click', () => {
-                showScreen(marketplaceScreen);
+            elements.navStore.addEventListener('click', () => {
+                showScreen('marketplace');
+                setActiveNav(elements.navStore);
                 fetchMarketplaceCards();
             });
 
-            navProfile.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
-            navHome.addEventListener('click', () => {
-                const currentUserId = sessionStorage.getItem('currentUserId');
+            elements.navProfile.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
+            elements.navHome.addEventListener('click', () => {
                 if (currentUserId) {
-                    showScreen(collectionScreen);
+                    showScreen('collection');
+                    setActiveNav(elements.navCollection);
                     fetchUserCards();
                 } else {
-                    showScreen(loginScreen);
+                    showScreen('login');
                 }
             });
-
-            // Initial state check
-            if (sessionStorage.getItem('currentUserId')) {
-                showScreen(collectionScreen);
+            // Nav listeners for marketplace screen
+            elements.navHomeM.addEventListener('click', () => elements.navHome.click());
+            elements.navCollectionM.addEventListener('click', () => elements.navCollection.click());
+            elements.navStoreM.addEventListener('click', () => elements.navStore.click());
+            elements.navProfileM.addEventListener('click', () => elements.navProfile.click());
+            
+            // --- Initial state check ---
+            currentUserId = sessionStorage.getItem('currentUserId');
+            if (currentUserId) {
+                showScreen('collection');
+                setActiveNav(elements.navCollection);
                 fetchUserCards();
             } else {
-                showScreen(loginScreen);
+                showScreen('login');
             }
         });
     </script>
