@@ -253,7 +253,52 @@ const firebaseConfig = {
                     loadingMessage.style.display = 'none';
                 }
             };
+// ประกาศตัวแปรสำหรับเก็บข้อมูลการ์ดทั้งหมด
+let allCardsData = [];
 
+// ฟังก์ชันสำหรับดึงข้อมูลการ์ดทั้งหมดจาก Firebase
+const fetchMarketplaceCards = async () => {
+    const marketplaceGrid = document.getElementById('marketplace-grid');
+    marketplaceGrid.innerHTML = `<div class="col-span-full text-center text-gray-500 mt-8">กำลังโหลดข้อมูลตลาดซื้อขาย...</div>`;
+    
+    try {
+        const cardsRef = db.collection("cards");
+        const querySnapshot = await cardsRef.get();
+        allCardsData = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        renderMarketplaceGrid();
+    } catch (error) {
+        console.error("Error fetching marketplace cards:", error);
+        marketplaceGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถโหลดข้อมูลตลาดซื้อขายได้: ${error.message}</div>`;
+    }
+};
+
+// ฟังก์ชันสำหรับแสดงผลการ์ดในหน้า Marketplace
+const renderMarketplaceGrid = () => {
+    const marketplaceGrid = document.getElementById('marketplace-grid');
+    marketplaceGrid.innerHTML = '';
+    
+    if (allCardsData.length === 0) {
+        marketplaceGrid.innerHTML = `<div class="col-span-full text-center text-gray-500 mt-8">ไม่พบการ์ดสำหรับแสดงในตลาด</div>`;
+        return;
+    }
+
+    allCardsData.forEach(card => {
+        const cardElement = document.createElement('div');
+        cardElement.className = 'card-item bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105';
+        cardElement.innerHTML = `
+            <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto object-cover"/>
+            <div class="p-2 text-center">
+                <h3 class="text-sm font-semibold truncate">${card.name}</h3>
+            </div>
+        `;
+        // เพิ่ม Event Listener เพื่อแสดงรายละเอียดการ์ดเมื่อคลิก
+        cardElement.addEventListener('click', () => openCardDetails(card));
+        marketplaceGrid.appendChild(cardElement);
+    });
+};
             const renderCardGrid = () => {
                 cardGrid.innerHTML = '';
                 if (cardsData.length === 0) {
