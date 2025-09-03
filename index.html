@@ -282,20 +282,22 @@ const firebaseConfig = {
             };
 
             const displayScannedCardData = (data) => {
-                cardInfo.innerHTML = '';
-                cardDisplay.classList.remove('hidden');
-                // โครงสร้างเดียวกับ openCardDetails แต่ปรับแต่งให้เข้ากับหน้านี้
+    cardInfo.innerHTML = '';
+    cardDisplay.classList.remove('hidden');
+
+    // นำโค้ด HTML สำหรับแสดงการ์ดมาใส่ในนี้
     cardInfo.innerHTML = `
-                <h3 class="text-2xl font-bold mb-4 text-yellow-600">${card.name}</h3>
-        <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg ring border-4 border-amber-400"/>
-        <p class="text-sm text-white-800 mt-4 mb-4">${card.description}</p>
-<div class="bg-blue-100 text-white p-4 rounded-xl text-left">
-    <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${card.stats.attack}, DEF: ${card.stats.defense}</p>
-    <p class="text-sm text-gray-700"><b>ระดับ:</b> ${card.rarity}</p>
-    <p class="text-sm text-gray-700"><b>Token ID:</b> ${card.token_id}</p>
-</div>
+        <img src="${data.image_url}" alt="${data.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md border-4 border-yellow-500"/>
+        <h3 class="text-2xl font-bold mb-2 text-yellow-600">${data.name}</h3>
+        <p class="text-sm text-gray-800 mb-4">${data.description}</p>
+        <div class="bg-gray-50 p-4 rounded-xl text-left shadow-md">
+            <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${data.stats ? data.stats.attack : 'N/A'}, DEF: ${data.stats ? data.stats.defense : 'N/A'}</p>
+            <p class="text-sm text-gray-700"><b>ระดับ:</b> ${data.rarity}</p>
+            <p class="text-sm text-gray-700"><b>Token ID:</b> ${data.token_id || 'N/A'}</p>
+        </div>
     `;
-                showMessage('เพิ่มการ์ดสำเร็จ!', 'success');
+
+    showMessage('เพิ่มการ์ดสำเร็จ!', 'success');
 };
             // --- Event Listeners ---
             loginForm.addEventListener('submit', (e) => {
