@@ -161,301 +161,298 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
-  authDomain: "cardverse-mvp.firebaseapp.com",
-  projectId: "cardverse-mvp",
-  storageBucket: "cardverse-mvp.firebasestorage.app",
-  messagingSenderId: "787364486859",
-  appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
-  measurementId: "G-WHQ7CV91X0"
-};
+    // Your web app's Firebase configuration
+    // WARN: This is for development only. Use environment variables in production.
+    const firebaseConfig = {
+        apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
+        authDomain: "cardverse-mvp.firebaseapp.com",
+        projectId: "cardverse-mvp",
+        storageBucket: "cardverse-mvp.firebasestorage.app",
+        messagingSenderId: "787364486859",
+        appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
+        measurementId: "G-WHQ7CV91X0"
+    };
 
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-            // --- Page Elements ---
-            const screens = {
-                login: document.getElementById('login-screen'),
-                collection: document.getElementById('collection-screen'),
-                nfc: document.getElementById('nfc-screen'),
-                marketplace: document.getElementById('marketplace-screen'),
-                modal: document.getElementById('card-modal')
-            };
+    // --- Page Elements ---
+    const screens = {
+        login: document.getElementById('login-screen'),
+        collection: document.getElementById('collection-screen'),
+        nfc: document.getElementById('nfc-screen'),
+        marketplace: document.getElementById('marketplace-screen'),
+        modal: document.getElementById('card-modal')
+    };
 
-            const elements = {
-                // Login
-                googleLoginBtn: document.getElementById('google-login-btn'),
-                // Collection
-                cardGrid: document.getElementById('card-grid'),
-                loadingMessageCollection: document.getElementById('loading-message-collection'),
-                // NFC
-                serialNumberInput: document.getElementById('serialNumberInput'),
-                submitSerialButton: document.getElementById('submitSerialButton'),
-                scanButtonNFC: document.getElementById('scan-button-nfc'),
-                messageBox: document.getElementById('messageBox'),
-                cardDisplay: document.getElementById('cardDisplay'),
-                cardInfo: document.getElementById('cardInfo'),
-                scanButtonCollection: document.getElementById('scan-button-collection'),
-                // Marketplace
-                marketplaceGrid: document.getElementById('marketplace-grid'),
-                loadingMessageMarketplace: document.getElementById('loading-message-marketplace'),
-                // Modal
-                closeModalButton: document.getElementById('close-modal-button'),
-                modalContent: document.getElementById('modal-content'),
-                // Nav
-                navHome: document.getElementById('nav-home'),
-                navCollection: document.getElementById('nav-collection'),
-                navStore: document.getElementById('nav-store'),
-                navProfile: document.getElementById('nav-profile'),
-                navHomeM: document.getElementById('nav-home-m'),
-                navCollectionM: document.getElementById('nav-collection-m'),
-                navStoreM: document.getElementById('nav-store-m'),
-                navProfileM: document.getElementById('nav-profile-m')
-            };
-            
-            let currentUserId = null;
+    const elements = {
+        // Login
+        googleLoginBtn: document.getElementById('google-login-btn'),
+        // Collection
+        cardGrid: document.getElementById('card-grid'),
+        loadingMessageCollection: document.getElementById('loading-message-collection'),
+        // NFC
+        serialNumberInput: document.getElementById('serialNumberInput'),
+        submitSerialButton: document.getElementById('submitSerialButton'),
+        scanButtonNFC: document.getElementById('scan-button-nfc'),
+        messageBox: document.getElementById('messageBox'),
+        cardDisplay: document.getElementById('cardDisplay'),
+        cardInfo: document.getElementById('cardInfo'),
+        scanButtonCollection: document.getElementById('scan-button-collection'),
+        // Marketplace
+        marketplaceGrid: document.getElementById('marketplace-grid'),
+        loadingMessageMarketplace: document.getElementById('loading-message-marketplace'),
+        // Modal
+        closeModalButton: document.getElementById('close-modal-button'),
+        modalContent: document.getElementById('modal-content'),
+        // Nav
+        navHome: document.getElementById('nav-home'),
+        navCollection: document.getElementById('nav-collection'),
+        navStore: document.getElementById('nav-store'),
+        navProfile: document.getElementById('nav-profile'),
+        navHomeM: document.getElementById('nav-home-m'),
+        navCollectionM: document.getElementById('nav-collection-m'),
+        navStoreM: document.getElementById('nav-store-m'),
+        navProfileM: document.getElementById('nav-profile-m')
+    };
+    
+    let currentUserId = null;
 
-            // --- Reusable Functions ---
-            const showScreen = (screenName) => {
-                Object.values(screens).forEach(screen => screen.style.display = 'none');
-                if (screens[screenName]) {
-                    screens[screenName].style.display = 'flex';
-                }
-            };
-            
-            const setActiveNav = (navItem) => {
-                const allNavs = [elements.navHome, elements.navCollection, elements.navStore, elements.navProfile, elements.navHomeM, elements.navCollectionM, elements.navStoreM, elements.navProfileM];
-                allNavs.forEach(nav => {
-                    if (nav) {
-                        nav.classList.add('opacity-50');
-                        nav.classList.remove('font-semibold');
-                    }
-                });
-                if (navItem) {
-                    navItem.classList.remove('opacity-50');
-                    navItem.classList.add('font-semibold');
-                }
-            };
-
-            const showMessage = (text, type = 'info') => {
-                elements.messageBox.textContent = text;
-                elements.messageBox.className = `p-4 rounded-xl text-center text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
-                elements.messageBox.style.display = 'block';
-            };
-            
-            const renderCardGrid = (data, element, isMarketplace = false) => {
-                element.innerHTML = '';
-                if (data.length === 0) {
-                    element.innerHTML = `<div class="col-span-full text-center text-gray-500 mt-8">ไม่พบข้อมูลการ์ด</div>`;
-                    return;
-                }
-                data.forEach(card => {
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105';
-                    cardElement.innerHTML = `
-                        <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto object-cover"/>
-                        <div class="p-2 text-center">
-                            <h3 class="text-sm font-semibold truncate">${card.name}</h3>
-                        </div>
-                    `;
-                    cardElement.addEventListener('click', () => openCardDetails(card, isMarketplace));
-                    element.appendChild(cardElement);
-                });
-            };
-
-            const openCardDetails = (card, isMarketplace) => {
-                elements.modalContent.innerHTML = `
-                    <h3 class="text-2xl font-bold mb-4 text-yellow-600">${card.name}</h3>
-                    <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg border-4 border-amber-400"/>
-                    <p class="text-sm text-gray-800 mt-4 mb-4">${card.description}</p>
-                    <div class="bg-gray-100 p-4 rounded-xl text-left">
-                        <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${card.stats ? card.stats.attack : 'N/A'}, DEF: ${card.stats ? card.stats.defense : 'N/A'}</p>
-                        <p class="text-sm text-gray-700"><b>ระดับ:</b> ${card.rarity}</p>
-                        <p class="text-sm text-gray-700"><b>Token ID:</b> ${card.token_id || 'N/A'}</p>
-                    </div>
-                    ${isMarketplace ? `<button id="buy-card-button" class="w-full mt-4 py-2 px-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">ซื้อการ์ด</button>` : ''}
-                `;
-                screens.modal.style.display = 'flex';
-                
-                if (isMarketplace) {
-                    const buyButton = document.getElementById('buy-card-button');
-                    if (buyButton) {
-                        buyButton.addEventListener('click', () => buyCard(card));
-                    }
-                }
-            };
-            
-            // --- Firebase Data Functions ---
-            const fetchUserCards = async () => {
-                elements.loadingMessageCollection.style.display = 'block';
-                if (!currentUserId) {
-                    showScreen('login');
-                    elements.loadingMessageCollection.style.display = 'none';
-                    return;
-                }
-                try {
-                    const userCardsCollection = await db.collection('users').doc(currentUserId).collection('my_cards').get();
-                    const cardsData = userCardsCollection.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    renderCardGrid(cardsData, elements.cardGrid);
-                } catch (error) {
-                    console.error("Error fetching user cards: ", error);
-                    elements.cardGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถดึงข้อมูลคอลเล็กชันได้: ${error.message}</div>`;
-                } finally {
-                    elements.loadingMessageCollection.style.display = 'none';
-                }
-            };
-
-            const fetchMarketplaceCards = async () => {
-                elements.loadingMessageMarketplace.style.display = 'block';
-                try {
-                    const allCardsCollection = await db.collection('cards').get();
-                    const allCardsData = allCardsCollection.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    renderCardGrid(allCardsData, elements.marketplaceGrid, true);
-                } catch (error) {
-                    console.error("Error fetching marketplace cards:", error);
-                    elements.marketplaceGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถโหลดข้อมูลตลาดซื้อขายได้: ${error.message}</div>`;
-                } finally {
-                    elements.loadingMessageMarketplace.style.display = 'none';
-                }
-            };
-
-            const addCardToUserCollection = async (cardData) => {
-                if (!currentUserId) {
-                    showMessage('กรุณาเข้าสู่ระบบก่อน', 'error');
-                    return;
-                }
-                try {
-                    const userCardsCollectionRef = db.collection('users').doc(currentUserId).collection('my_cards');
-                    const cardDocRef = userCardsCollectionRef.doc(cardData.serial_number);
-                    
-                    const cardDoc = await cardDocRef.get();
-                    if (cardDoc.exists) {
-                        showMessage('การ์ดใบนี้อยู่ในคอลเล็กชันของคุณแล้ว', 'info');
-                        return;
-                    }
-                    
-                    await cardDocRef.set(cardData);
-                    showMessage(`เพิ่ม ${cardData.name} เข้าคอลเล็กชันสำเร็จ!`, 'success');
-                    fetchUserCards();
-                } catch (error) {
-                    console.error("Error adding card to user's collection: ", error);
-                    showMessage("เกิดข้อผิดพลาดในการเพิ่มการ์ด", 'error');
-                }
-            };
-
-            const buyCard = async (cardData) => {
-                await addCardToUserCollection(cardData);
-                screens.modal.style.display = 'none';
-                // Switch to collection screen after buying the card
-                showScreen('collection');
-                setActiveNav(elements.navCollection);
-                fetchUserCards();
-            };
-
-            // --- Event Listeners ---
-            elements.googleLoginBtn.addEventListener('click', () => {
-                // Mock login for demo purposes
-                currentUserId = 'demo_user';
-                sessionStorage.setItem('currentUserId', currentUserId);
-                showScreen('collection');
-                setActiveNav(elements.navCollection);
-                fetchUserCards();
-            });
-
-            elements.submitSerialButton.addEventListener('click', async () => {
-                const serialNumber = elements.serialNumberInput.value.trim();
-                if (serialNumber) {
-                    try {
-                        const cardDoc = await db.collection('cards').doc(serialNumber).get();
-                        if (cardDoc.exists) {
-                            const cardData = cardDoc.data();
-                            await addCardToUserCollection(cardData);
-                            elements.serialNumberInput.value = '';
-                            elements.cardDisplay.style.display = 'block';
-                            elements.cardInfo.innerHTML = `
-                                <img src="${cardData.image_url}" alt="${cardData.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md border-4 border-yellow-500"/>
-                                <h3 class="text-2xl font-bold mb-2 text-yellow-600">${cardData.name}</h3>
-                                <p class="text-sm text-gray-800 mb-4">${cardData.description}</p>
-                                <div class="bg-gray-50 p-4 rounded-xl text-left shadow-md">
-                                    <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${cardData.stats ? cardData.stats.attack : 'N/A'}, DEF: ${cardData.stats ? cardData.stats.defense : 'N/A'}</p>
-                                    <p class="text-sm text-gray-700"><b>ระดับ:</b> ${cardData.rarity}</p>
-                                    <p class="text-sm text-gray-700"><b>Token ID:</b> ${cardData.token_id || 'N/A'}</p>
-                                </div>
-                            `;
-                        } else {
-                            showMessage('ไม่พบ Serial Number นี้ในระบบ', 'error');
-                            elements.cardDisplay.style.display = 'none';
-                        }
-                    } catch (error) {
-                        console.error("Error fetching card by serial number:", error);
-                        showMessage('เกิดข้อผิดพลาดในการค้นหาการ์ด', 'error');
-                    }
-                } else {
-                    showMessage('กรุณากรอก Serial Number', 'error');
-                    elements.cardDisplay.style.display = 'none';
-                }
-            });
-
-            elements.closeModalButton.addEventListener('click', () => {
-                screens.modal.style.display = 'none';
-            });
-            
-            elements.scanButtonCollection.addEventListener('click', () => {
-                showScreen('nfc');
-            });
-            
-            elements.scanButtonNFC.addEventListener('click', () => {
-                // Simulate NFC scan by triggering the serial number submit
-                elements.submitSerialButton.click();
-            });
-
-            elements.navCollection.addEventListener('click', () => {
-                showScreen('collection');
-                setActiveNav(elements.navCollection);
-                fetchUserCards();
-            });
-
-            elements.navStore.addEventListener('click', () => {
-                showScreen('marketplace');
-                setActiveNav(elements.navStore);
-                fetchMarketplaceCards();
-            });
-
-            elements.navProfile.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
-            elements.navHome.addEventListener('click', () => {
-                if (currentUserId) {
-                    showScreen('collection');
-                    setActiveNav(elements.navCollection);
-                    fetchUserCards();
-                } else {
-                    showScreen('login');
-                }
-            });
-            // Nav listeners for marketplace screen
-            elements.navHomeM.addEventListener('click', () => elements.navHome.click());
-            elements.navCollectionM.addEventListener('click', () => elements.navCollection.click());
-            elements.navStoreM.addEventListener('click', () => elements.navStore.click());
-            elements.navProfileM.addEventListener('click', () => elements.navProfile.click());
-            
-            // --- Initial state check ---
-            currentUserId = sessionStorage.getItem('currentUserId');
-            if (currentUserId) {
-                showScreen('collection');
-                setActiveNav(elements.navCollection);
-                fetchUserCards();
-            } else {
-                showScreen('login');
+    // --- Reusable Functions ---
+    const showScreen = (screenName) => {
+        Object.values(screens).forEach(screen => screen.style.display = 'none');
+        if (screens[screenName]) {
+            screens[screenName].style.display = 'flex';
+        }
+    };
+    
+    const setActiveNav = (navItem) => {
+        const allNavs = [elements.navHome, elements.navCollection, elements.navStore, elements.navProfile, elements.navHomeM, elements.navCollectionM, elements.navStoreM, elements.navProfileM];
+        allNavs.forEach(nav => {
+            if (nav) {
+                nav.classList.add('opacity-50');
+                nav.classList.remove('font-semibold');
             }
         });
-    </script>
-</body>
-</html>
+        if (navItem) {
+            navItem.classList.remove('opacity-50');
+            navItem.classList.add('font-semibold');
+        }
+    };
+
+    const showMessage = (text, type = 'info') => {
+        elements.messageBox.textContent = text;
+        elements.messageBox.className = `p-4 rounded-xl text-center text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+        elements.messageBox.style.display = 'block';
+    };
+    
+    const renderCardGrid = (data, element, isMarketplace = false) => {
+        element.innerHTML = '';
+        if (data.length === 0) {
+            element.innerHTML = `<div class="col-span-full text-center text-gray-500 mt-8">ไม่พบข้อมูลการ์ด</div>`;
+            return;
+        }
+        data.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105';
+            cardElement.innerHTML = `
+                <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto object-cover"/>
+                <div class="p-2 text-center">
+                    <h3 class="text-sm font-semibold truncate">${card.name}</h3>
+                </div>
+            `;
+            cardElement.addEventListener('click', () => openCardDetails(card, isMarketplace));
+            element.appendChild(cardElement);
+        });
+    };
+
+    const openCardDetails = (card, isMarketplace) => {
+        elements.modalContent.innerHTML = `
+            <h3 class="text-2xl font-bold mb-4 text-yellow-600">${card.name}</h3>
+            <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg border-4 border-amber-400"/>
+            <p class="text-sm text-gray-800 mt-4 mb-4">${card.description}</p>
+            <div class="bg-gray-100 p-4 rounded-xl text-left">
+                <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${card.stats ? card.stats.attack : 'N/A'}, DEF: ${card.stats ? card.stats.defense : 'N/A'}</p>
+                <p class="text-sm text-gray-700"><b>ระดับ:</b> ${card.rarity}</p>
+                <p class="text-sm text-gray-700"><b>Token ID:</b> ${card.token_id || 'N/A'}</p>
+            </div>
+            ${isMarketplace ? `<button id="buy-card-button" class="w-full mt-4 py-2 px-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">ซื้อการ์ด</button>` : ''}
+        `;
+        screens.modal.style.display = 'flex';
+        
+        if (isMarketplace) {
+            const buyButton = document.getElementById('buy-card-button');
+            if (buyButton) {
+                buyButton.addEventListener('click', () => buyCard(card));
+            }
+        }
+    };
+    
+    // --- Firebase Data Functions ---
+    const fetchUserCards = async () => {
+        elements.loadingMessageCollection.style.display = 'block';
+        if (!currentUserId) {
+            showScreen('login');
+            elements.loadingMessageCollection.style.display = 'none';
+            return;
+        }
+        try {
+            const userCardsCollection = await db.collection('users').doc(currentUserId).collection('my_cards').get();
+            const cardsData = userCardsCollection.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            renderCardGrid(cardsData, elements.cardGrid);
+        } catch (error) {
+            console.error("Error fetching user cards: ", error);
+            elements.cardGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถดึงข้อมูลคอลเล็กชันได้: ${error.message}</div>`;
+        } finally {
+            elements.loadingMessageCollection.style.display = 'none';
+        }
+    };
+
+    const fetchMarketplaceCards = async () => {
+        elements.loadingMessageMarketplace.style.display = 'block';
+        try {
+            const allCardsCollection = await db.collection('cards').get();
+            const allCardsData = allCardsCollection.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            renderCardGrid(allCardsData, elements.marketplaceGrid, true);
+        } catch (error) {
+            console.error("Error fetching marketplace cards:", error);
+            elements.marketplaceGrid.innerHTML = `<div class="col-span-full text-center text-red-500 mt-8">ไม่สามารถโหลดข้อมูลตลาดซื้อขายได้: ${error.message}</div>`;
+        } finally {
+            elements.loadingMessageMarketplace.style.display = 'none';
+        }
+    };
+
+    const addCardToUserCollection = async (cardData) => {
+        if (!currentUserId) {
+            showMessage('กรุณาเข้าสู่ระบบก่อน', 'error');
+            return;
+        }
+        try {
+            const userCardsCollectionRef = db.collection('users').doc(currentUserId).collection('my_cards');
+            const cardDocRef = userCardsCollectionRef.doc(cardData.serial_number);
+            
+            const cardDoc = await cardDocRef.get();
+            if (cardDoc.exists) {
+                showMessage('การ์ดใบนี้อยู่ในคอลเล็กชันของคุณแล้ว', 'info');
+                return;
+            }
+            
+            await cardDocRef.set(cardData);
+            showMessage(`เพิ่ม ${cardData.name} เข้าคอลเล็กชันสำเร็จ!`, 'success');
+            // Re-fetch user cards after adding the new one
+            await fetchUserCards();
+        } catch (error) {
+            console.error("Error adding card to user's collection: ", error);
+            showMessage("เกิดข้อผิดพลาดในการเพิ่มการ์ด", 'error');
+        }
+    };
+
+    const buyCard = async (cardData) => {
+        await addCardToUserCollection(cardData);
+        screens.modal.style.display = 'none';
+        showScreen('collection');
+        setActiveNav(elements.navCollection);
+        // We already call fetchUserCards inside addCardToUserCollection, so no need to call it again here.
+    };
+
+    // --- Event Listeners ---
+    elements.googleLoginBtn.addEventListener('click', () => {
+        // Mock login for demo purposes
+        currentUserId = 'demo_user';
+        sessionStorage.setItem('currentUserId', currentUserId);
+        showScreen('collection');
+        setActiveNav(elements.navCollection);
+        fetchUserCards();
+    });
+
+    elements.submitSerialButton.addEventListener('click', async () => {
+        const serialNumber = elements.serialNumberInput.value.trim();
+        if (serialNumber) {
+            try {
+                const cardDoc = await db.collection('cards').doc(serialNumber).get();
+                if (cardDoc.exists) {
+                    const cardData = cardDoc.data();
+                    await addCardToUserCollection(cardData);
+                    elements.serialNumberInput.value = '';
+                    elements.cardDisplay.style.display = 'block';
+                    elements.cardInfo.innerHTML = `
+                        <img src="${cardData.image_url}" alt="${cardData.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md border-4 border-yellow-500"/>
+                        <h3 class="text-2xl font-bold mb-2 text-yellow-600">${cardData.name}</h3>
+                        <p class="text-sm text-gray-800 mb-4">${cardData.description}</p>
+                        <div class="bg-gray-50 p-4 rounded-xl text-left shadow-md">
+                            <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${cardData.stats ? cardData.stats.attack : 'N/A'}, DEF: ${cardData.stats ? cardData.stats.defense : 'N/A'}</p>
+                            <p class="text-sm text-gray-700"><b>ระดับ:</b> ${cardData.rarity}</p>
+                            <p class="text-sm text-gray-700"><b>Token ID:</b> ${cardData.token_id || 'N/A'}</p>
+                        </div>
+                    `;
+                } else {
+                    showMessage('ไม่พบ Serial Number นี้ในระบบ', 'error');
+                    elements.cardDisplay.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error fetching card by serial number:", error);
+                showMessage('เกิดข้อผิดพลาดในการค้นหาการ์ด', 'error');
+            }
+        } else {
+            showMessage('กรุณากรอก Serial Number', 'error');
+            elements.cardDisplay.style.display = 'none';
+        }
+    });
+
+    elements.closeModalButton.addEventListener('click', () => {
+        screens.modal.style.display = 'none';
+    });
+    
+    elements.scanButtonCollection.addEventListener('click', () => {
+        showScreen('nfc');
+    });
+    
+    elements.scanButtonNFC.addEventListener('click', () => {
+        // Simulate NFC scan by triggering the serial number submit
+        elements.submitSerialButton.click();
+    });
+
+    elements.navCollection.addEventListener('click', () => {
+        showScreen('collection');
+        setActiveNav(elements.navCollection);
+        fetchUserCards();
+    });
+
+    elements.navStore.addEventListener('click', () => {
+        showScreen('marketplace');
+        setActiveNav(elements.navStore);
+        fetchMarketplaceCards();
+    });
+
+    elements.navProfile.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
+    elements.navHome.addEventListener('click', () => {
+        if (currentUserId) {
+            showScreen('collection');
+            setActiveNav(elements.navCollection);
+            fetchUserCards();
+        } else {
+            showScreen('login');
+        }
+    });
+    // Nav listeners for marketplace screen
+    elements.navHomeM.addEventListener('click', () => elements.navHome.click());
+    elements.navCollectionM.addEventListener('click', () => elements.navCollection.click());
+    elements.navStoreM.addEventListener('click', () => elements.navStore.click());
+    elements.navProfileM.addEventListener('click', () => elements.navProfile.click());
+    
+    // --- Initial state check ---
+    currentUserId = sessionStorage.getItem('currentUserId');
+    if (currentUserId) {
+        showScreen('collection');
+        setActiveNav(elements.navCollection);
+        fetchUserCards();
+    } else {
+        showScreen('login');
+    }
+});
