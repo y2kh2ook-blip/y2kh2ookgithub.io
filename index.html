@@ -172,6 +172,7 @@ const firebaseConfig = {
   appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
   measurementId: "G-WHQ7CV91X0"
 };
+
             firebase.initializeApp(firebaseConfig);
             const db = firebase.firestore();
 
@@ -354,6 +355,10 @@ const firebaseConfig = {
             const buyCard = async (cardData) => {
                 await addCardToUserCollection(cardData);
                 screens.modal.style.display = 'none';
+                // Switch to collection screen after buying the card
+                showScreen('collection');
+                setActiveNav(elements.navCollection);
+                fetchUserCards();
             };
 
             // --- Event Listeners ---
