@@ -261,7 +261,7 @@ const firebaseConfig = {
         <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg ring border-4 border-amber-400"/>
         <p class="text-sm text-white-800 mt-4 mb-4">${card.description}</p>
 <div class="bg-blue-100 text-white p-4 rounded-xl text-left">
-    <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${card.stats.attack}, DEF: ${card.stats.defense}</p>
+    <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${card.stats ? card.stats.attack : 'N/A'}, DEF: ${card.stats ? card.stats.defense : 'N/A'}</p>
     <p class="text-sm text-gray-700"><b>ระดับ:</b> ${card.rarity}</p>
     <p class="text-sm text-gray-700"><b>Token ID:</b> ${card.token_id}</p>
 </div>
