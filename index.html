@@ -435,17 +435,19 @@ const renderMarketplaceGrid = () => {
     }
 });
 
-            // Navigation
-            navCollection.addEventListener('click', () => {
-                showScreen(collectionScreen);
-                fetchCardsFromFirebase();
-            });
-            // ประกาศตัวแปรสำหรับปุ่มและหน้าจอ
-const collectionButton = document.getElementById('collection-button');
-const marketplaceButton = document.getElementById('marketplace-button');
+            // Event Listener สำหรับการนำทาง
+navCollection.addEventListener('click', () => {
+    showScreen(collectionScreen);
+    fetchCardsFromFirebase();
+});
 
-const collectionScreen = document.getElementById('collection-screen');
-const marketplaceScreen = document.getElementById('marketplace-screen');
+navStore.addEventListener('click', () => {
+    // ให้แสดงหน้า marketplace-screen เมื่อกดปุ่มนี้
+    showScreen(marketplaceScreen);
+    fetchMarketplaceCards();
+});
+
+navProfile.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
 
 // Event Listener สำหรับปุ่มคอลเล็กชัน
 collectionButton.addEventListener('click', () => {
