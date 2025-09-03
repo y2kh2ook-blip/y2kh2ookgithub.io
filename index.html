@@ -284,14 +284,19 @@ const firebaseConfig = {
             const displayScannedCardData = (data) => {
                 cardInfo.innerHTML = '';
                 cardDisplay.classList.remove('hidden');
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ชื่อการ์ด: <span class="font-normal">${data.name}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">รายละเอียด: <span class="font-normal">${data.description}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ค่าพลัง: <span class="font-normal">${data.power}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">ระดับ: <span class="font-normal">${data.rarity}</span></p>`;
-                cardInfo.innerHTML += `<p class="text-lg font-semibold">สถานะการเป็นเจ้าของ (Token ID): <span class="font-normal">${data.tokenId}</span></p>`;
-                showMessage('สแกนสำเร็จ!', 'success');
-            };
-
+                // โครงสร้างเดียวกับ openCardDetails แต่ปรับแต่งให้เข้ากับหน้านี้
+    cardInfo.innerHTML = `
+                <h3 class="text-2xl font-bold mb-4 text-yellow-600">${card.name}</h3>
+        <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg ring border-4 border-amber-400"/>
+        <p class="text-sm text-white-800 mt-4 mb-4">${card.description}</p>
+<div class="bg-blue-100 text-white p-4 rounded-xl text-left">
+    <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${card.stats.attack}, DEF: ${card.stats.defense}</p>
+    <p class="text-sm text-gray-700"><b>ระดับ:</b> ${card.rarity}</p>
+    <p class="text-sm text-gray-700"><b>Token ID:</b> ${card.token_id}</p>
+</div>
+    `;
+                showMessage('เพิ่มการ์ดสำเร็จ!', 'success');
+};
             // --- Event Listeners ---
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
