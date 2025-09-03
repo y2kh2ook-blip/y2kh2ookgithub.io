@@ -32,25 +32,19 @@
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
-        .text-yellow-600 {
-            color: #d69e2e;
-        }
-        .border-amber-400 {
-            border-color: #fbbf24;
-        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
 
-    <div id="login-screen" class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md mx-4 sm:mx-6 md:mx-auto text-center" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <div class="mb-8 w-full">
+    <div id="login-screen" class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md mx-4 sm:mx-6 md:mx-auto text-center" style="display: block;">
+        <div class="mb-8">
             <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 12l10 10 10-10L12 2zm0 18.83L3.17 12 12 3.17 20.83 12 12 20.83zM12 14c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
             </div>
-            <h1 class="text-gray-800 text-4xl md:text-5xl font-extrabold tracking-wider">CardVerse</h1>
+            <h1 class="logo-text text-gray-800">CardVerse</h1>
             <p class="text-gray-500 mt-2">Phygital Game Card</p>
         </div>
-        <div class="space-y-4 mb-8 w-full">
+        <div class="space-y-4 mb-8">
             <button class="btn-social flex items-center justify-center w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M21.35 12.04c0-.79-.07-1.54-.18-2.29H12v4.32h4.94a5.15 5.15 0 01-2.23 3.37v2.8h3.6c2.1-1.94 3.32-4.8 3.32-8.3z"/><path d="M12 20.01c-3.14 0-5.83-1.74-7.29-4.32l3.6-2.8c.84.58 1.96.93 3.69.93 1.83 0 3.35-.6 4.62-1.63L18.4 17.5c-1.3 1.25-3.08 2.01-5.11 2.01z"/><path d="M4.71 12c0-1.02.2-1.98.54-2.86l-3.6-2.8c-.85 1.77-1.33 3.79-1.33 5.66s.48 3.89 1.33 5.66l3.6-2.8c-.34-.88-.54-1.84-.54-2.86z"/><path d="M12 4.01c1.92 0 3.53.64 4.62 1.63L20.21 2c-1.26-1.18-2.94-1.9-4.9-1.9-2.73 0-5.13 1.08-6.93 2.86l3.6 2.8c.95-.58 2.07-.93 3.53-.93z"/></svg>
                 เข้าสู่ระบบด้วย Google
@@ -60,12 +54,12 @@
                 เข้าสู่ระบบด้วย Facebook
             </button>
         </div>
-        <div class="relative flex items-center mb-6 w-full">
+        <div class="relative flex items-center mb-6">
             <div class="flex-grow border-t border-gray-300"></div>
             <span class="flex-shrink mx-4 text-gray-400 text-sm">หรือ</span>
             <div class="flex-grow border-t border-gray-300"></div>
         </div>
-        <form id="login-form" class="w-full">
+        <form id="login-form">
             <div class="space-y-4">
                 <input type="text" id="username" placeholder="ชื่อผู้ใช้" class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
                 <input type="password" id="password" placeholder="รหัสผ่าน" class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
@@ -90,7 +84,6 @@
         <button id="scan-button-collection" class="fixed bottom-24 right-4 z-50 p-4 bg-gray-900 text-white rounded-full shadow-2xl flex items-center justify-center transform transition-transform hover:scale-110">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M3 17v2a2 2 0 0 0 2 2h2"/></svg>
         </button>
-        
         <div id="card-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50" style="display: none;">
             <div class="bg-gray-900 bg-opacity-80 text-white p-6 rounded-2xl shadow-lg border border-gray-300 w-full max-w-sm relative">
                 <button id="close-modal" class="absolute top-3 right-3 text-yellow-500 hover:text-yellow-900">
@@ -100,9 +93,12 @@
                     </div>
             </div>
         </div>
-
         <nav class="fixed bottom-0 left-0 right-0 bg-gray-900 shadow-2xl z-40">
             <div class="flex justify-around items-center h-16">
+                <div id="nav-home" class="flex flex-col items-center text-white opacity-50 cursor-pointer hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span class="text-xs mt-1">หน้าหลัก</span>
+                </div>
                 <div id="nav-collection" class="flex flex-col items-center text-white cursor-pointer hover:opacity-100">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grid"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
                     <span class="text-xs mt-1 font-semibold">คอลเล็กชัน</span>
@@ -122,18 +118,18 @@
     <div id="nfc-screen" class="flex items-center justify-center min-h-screen p-4 w-full" style="display: none;">
         <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-lg text-center space-y-6">
             <h1 class="text-3xl font-bold text-gray-800">CardVerse PoC: ทดสอบระบบ NFC</h1>
-            <p class="text-gray-600">สแกนการ์ดจริงด้วยชิป NFC หรือกรอก Serial Number</p>
+            <p class="text-gray-600">กดปุ่มด้านล่างเพื่อเริ่มสแกนการ์ดจริงด้วยชิป NFC</p>
             <div class="space-y-4">
-                <input type="text" id="serialNumberInput" placeholder="กรอก Serial Number" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
-                <button id="submitSerialButton" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-colors">
-                    เพิ่มการ์ดด้วย Serial Number
-                </button>
-            </div>
-            <div class="relative flex items-center mt-6 mb-6">
-                <div class="flex-grow border-t border-gray-300"></div>
-                <span class="flex-shrink mx-4 text-gray-400 text-sm">หรือ</span>
-                <div class="flex-grow border-t border-gray-300"></div>
-            </div>
+    <input type="text" id="serialNumberInput" placeholder="กรอก Serial Number" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+    <button id="submitSerialButton" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-colors">
+        เพิ่มการ์ดด้วย Serial Number
+    </button>
+</div>
+<div class="relative flex items-center mt-6 mb-6">
+    <div class="flex-grow border-t border-gray-300"></div>
+    <span class="flex-shrink mx-4 text-gray-400 text-sm">หรือ</span>
+    <div class="flex-grow border-t border-gray-300"></div>
+</div>
             <button id="scan-button-nfc" class="w-full py-4 px-6 bg-gray-900 text-white font-semibold rounded-xl shadow-lg hover:bg-gray-700 transition-colors">
                 แตะเพื่อสแกนการ์ด
             </button>
@@ -146,8 +142,10 @@
     </div>
 
     <script>
+        const serialNumberInput = document.getElementById('serialNumberInput');
+const submitSerialButton = document.getElementById('submitSerialButton');
         document.addEventListener('DOMContentLoaded', () => {
-           // Your web app's Firebase configuration
+            // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCef_Xm2vxmaLuZodymWb3tV4mbETvASgw",
@@ -158,10 +156,29 @@ const firebaseConfig = {
   appId: "1:787364486859:web:73ed9203ddbe10bb5a854e",
   measurementId: "G-WHQ7CV91X0"
 };
+            submitSerialButton.addEventListener('click', () => {
+    const serialNumber = serialNumberInput.value.trim(); // รับค่าและลบช่องว่าง
+    if (serialNumber) {
+        // ค้นหาการ์ดในข้อมูลที่ดึงมาจาก Firebase
+        const foundCard = cardsData.find(card => card.serial_number === serialNumber);
 
+        if (foundCard) {
+            displayScannedCardData(foundCard);
+            showMessage('เพิ่มการ์ดสำเร็จ!', 'success');
+            // (Optional) คุณอาจจะเพิ่มโค้ดเพื่อเพิ่มการ์ดนี้เข้าคอลเล็กชันของผู้ใช้จริงๆ ในขั้นตอนนี้
+        } else {
+            showMessage('ไม่พบ Serial Number นี้ในระบบ', 'error');
+            cardDisplay.classList.add('hidden');
+        }
+    } else {
+        showMessage('กรุณากรอก Serial Number', 'error');
+    }
+});
+
+            // Initialize Firebase
             firebase.initializeApp(firebaseConfig);
             const db = firebase.firestore();
-            let cardsData = [];
+            let cardsData = []; // สร้างตัวแปร global เพื่อเก็บข้อมูลการ์ดที่ดึงมาแล้ว
 
             // --- Page Elements ---
             const loginScreen = document.getElementById('login-screen');
@@ -182,29 +199,27 @@ const firebaseConfig = {
             const loadingMessage = document.getElementById('loading-message');
 
             // NFC Scan Page
-            const serialNumberInput = document.getElementById('serialNumberInput');
-            const submitSerialButton = document.getElementById('submitSerialButton');
             const scanButtonNFC = document.getElementById('scan-button-nfc');
             const messageBox = document.getElementById('messageBox');
             const cardDisplay = document.getElementById('cardDisplay');
             const cardInfo = document.getElementById('cardInfo');
 
             // Navigation
+            const navHome = document.getElementById('nav-home');
             const navCollection = document.getElementById('nav-collection');
             const navStore = document.getElementById('nav-store');
             const navProfile = document.getElementById('nav-profile');
 
             // --- Functions ---
             const showScreen = (screenToShow) => {
-                const allScreens = [loginScreen, collectionScreen, nfcScreen];
-                allScreens.forEach(screen => {
-                    screen.style.display = (screen === screenToShow) ? 'flex' : 'none';
-                });
+                loginScreen.style.display = 'none';
+                collectionScreen.style.display = 'none';
+                nfcScreen.style.display = 'none';
+                screenToShow.style.display = 'flex';
             };
 
             const fetchCardsFromFirebase = async () => {
                 loadingMessage.style.display = 'block';
-                cardGrid.innerHTML = '';
                 try {
                     const cardsCollection = await db.collection('cards').get();
                     cardsData = cardsCollection.docs.map(doc => ({
@@ -221,6 +236,7 @@ const firebaseConfig = {
             };
 
             const renderCardGrid = () => {
+                cardGrid.innerHTML = '';
                 if (cardsData.length === 0) {
                     cardGrid.innerHTML = `<div class="col-span-full text-center text-gray-500 mt-8">ไม่พบข้อมูลการ์ดในคอลเล็กชัน</div>`;
                     return;
@@ -240,23 +256,22 @@ const firebaseConfig = {
             };
 
             const openCardDetails = (card) => {
-                modalContent.innerHTML = `
-                    <h3 class="text-2xl font-bold mb-4 text-yellow-600">${card.name}</h3>
-                    <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg ring border-4 border-amber-400"/>
-                    <p class="text-sm text-gray-300 mt-4 mb-4">${card.description}</p>
-                    <div class="bg-gray-800 text-white p-4 rounded-xl text-left">
-                        <p class="text-sm"><b>ค่าพลัง:</b> ATT: ${card.stats?.attack ?? 'N/A'}, DEF: ${card.stats?.defense ?? 'N/A'}</p>
-                        <p class="text-sm"><b>ระดับ:</b> ${card.rarity}</p>
-                        <p class="text-sm"><b>Token ID:</b> ${card.token_id ?? 'N/A'}</p>
-                    </div>
-                `;
-                cardModal.style.display = 'flex';
-            };
+    modalContent.innerHTML = `
+        <h3 class="text-2xl font-bold mb-4 text-yellow-600">${card.name}</h3>
+        <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg ring border-4 border-amber-400"/>
+        <p class="text-sm text-white-800 mt-4 mb-4">${card.description}</p>
+<div class="bg-blue-100 text-white p-4 rounded-xl text-left">
+    <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${card.stats ? card.stats.attack : 'N/A'}, DEF: ${card.stats ? card.stats.defense : 'N/A'}</p>
+    <p class="text-sm text-gray-700"><b>ระดับ:</b> ${card.rarity}</p>
+    <p class="text-sm text-gray-700"><b>Token ID:</b> ${card.token_id}</p>
+</div>
+    `;
+    cardModal.style.display = 'flex';
+};
 
             const showMessage = (text, type = 'info') => {
                 messageBox.textContent = text;
                 messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
-                messageBox.classList.add('block');
                 if (type === 'error') {
                     messageBox.classList.add('bg-red-100', 'text-red-700');
                 } else if (type === 'success') {
@@ -267,23 +282,27 @@ const firebaseConfig = {
             };
 
             const displayScannedCardData = (data) => {
-                cardInfo.innerHTML = `
-                    <img src="${data.image_url}" alt="${data.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md border-4 border-yellow-500"/>
-                    <h3 class="text-2xl font-bold mb-2 text-yellow-600">${data.name}</h3>
-                    <p class="text-sm text-gray-800 mb-4">${data.description}</p>
-                    <div class="bg-gray-50 p-4 rounded-xl text-left shadow-md">
-                        <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${data.stats?.attack ?? 'N/A'}, DEF: ${data.stats?.defense ?? 'N/A'}</p>
-                        <p class="text-sm text-gray-700"><b>ระดับ:</b> ${data.rarity}</p>
-                        <p class="text-sm text-gray-700"><b>Serial Number:</b> ${data.serial_number ?? 'N/A'}</p>
-                        <p class="text-sm text-gray-700"><b>Token ID:</b> ${data.token_id ?? 'N/A'}</p>
-                    </div>
-                `;
-                cardDisplay.classList.remove('hidden');
-            };
+    cardInfo.innerHTML = '';
+    cardDisplay.classList.remove('hidden');
 
+    // นำโค้ด HTML สำหรับแสดงการ์ดมาใส่ในนี้
+    cardInfo.innerHTML = `
+        <img src="${data.image_url}" alt="${data.name}" class="w-48 h-auto mx-auto mb-4 rounded-xl shadow-md border-4 border-yellow-500"/>
+        <h3 class="text-2xl font-bold mb-2 text-yellow-600">${data.name}</h3>
+        <p class="text-sm text-gray-800 mb-4">${data.description}</p>
+        <div class="bg-gray-50 p-4 rounded-xl text-left shadow-md">
+            <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${data.stats ? data.stats.attack : 'N/A'}, DEF: ${data.stats ? data.stats.defense : 'N/A'}</p>
+            <p class="text-sm text-gray-700"><b>ระดับ:</b> ${data.rarity}</p>
+            <p class="text-sm text-gray-700"><b>Token ID:</b> ${data.token_id || 'N/A'}</p>
+        </div>
+    `;
+
+    showMessage('เพิ่มการ์ดสำเร็จ!', 'success');
+};
             // --- Event Listeners ---
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+                // Simulate login
                 if (usernameInput.value && passwordInput.value) {
                     showScreen(collectionScreen);
                     fetchCardsFromFirebase();
@@ -300,91 +319,68 @@ const firebaseConfig = {
                 showScreen(nfcScreen);
             });
 
-            submitSerialButton.addEventListener('click', () => {
-                const serialNumber = serialNumberInput.value.trim();
-                if (serialNumber) {
-                    const foundCard = cardsData.find(card => card.serial_number === serialNumber);
-                    if (foundCard) {
-                        displayScannedCardData(foundCard);
-                        showMessage('เพิ่มการ์ดสำเร็จ!', 'success');
-                    } else {
-                        showMessage('ไม่พบ Serial Number นี้ในระบบ', 'error');
-                        cardDisplay.classList.add('hidden');
-                    }
-                } else {
-                    showMessage('กรุณากรอก Serial Number', 'error');
-                }
-            });
-
             scanButtonNFC.addEventListener('click', async () => {
-                showMessage('กำลังสแกนการ์ด... กรุณาแตะการ์ดที่ด้านหลังอุปกรณ์', 'info');
-                cardDisplay.classList.add('hidden');
-                
-                if ('NDEFReader' in window) {
-                    try {
-                        const ndef = new NDEFReader();
-                        await ndef.scan();
-                        console.log("Start scanning...");
+    showMessage('กำลังสแกนการ์ด... กรุณาแตะการ์ดที่ด้านหลังอุปกรณ์', 'info');
+    cardDisplay.classList.add('hidden');
+    cardInfo.innerHTML = '';
+    
+    // ตรวจสอบว่าเบราว์เซอร์รองรับ Web NFC หรือไม่
+    if ('NDEFReader' in window) {
+        try {
+            const ndef = new NDEFReader();
+            await ndef.scan();
+            console.log("เริ่มสแกน...");
 
-                        ndef.onreading = event => {
-                            const message = event.message;
-                            if (message.records.length > 0) {
-                                const record = message.records[0];
-                                let serialNumber = '';
-                                if (record.recordType === 'text') {
-                                    const textDecoder = new TextDecoder();
-                                    serialNumber = textDecoder.decode(record.data);
-                                    
-                                    const scannedCard = cardsData.find(card => card.serial_number === serialNumber);
-                                    
-                                    if (scannedCard) {
-                                        displayScannedCardData(scannedCard);
-                                        showMessage('สแกนสำเร็จ!', 'success');
-                                    } else {
-                                        showMessage('ไม่พบการ์ดใบนี้ในฐานข้อมูล', 'error');
-                                        cardDisplay.classList.add('hidden');
-                                    }
-                                } else {
-                                    showMessage('รูปแบบข้อมูลไม่ถูกต้อง', 'error');
-                                }
-                            } else {
-                                showMessage('ไม่พบข้อมูลในชิป NFC', 'error');
-                            }
-                        };
+            ndef.onreading = event => {
+                const message = event.message;
+                const record = message.records[0];
+                let serialNumber = '';
 
-                        ndef.onreadingerror = event => {
-                            showMessage('การสแกนล้มเหลว', 'error');
-                        };
-                    } catch (error) {
-                        showMessage(`การสแกนล้มเหลว: ${error.message}`, 'error');
+                if (record.recordType === 'text') {
+                    const textDecoder = new TextDecoder();
+                    serialNumber = textDecoder.decode(record.data);
+                    
+                    // นำ serialNumber ที่ได้ไปค้นหาการ์ดใน Firebase
+                    const scannedCard = cardsData.find(card => card.serial_number === serialNumber);
+                    
+                    if (scannedCard) {
+                        displayScannedCardData(scannedCard);
+                    } else {
+                        showMessage('ไม่พบการ์ดใบนี้ในฐานข้อมูล', 'error');
                     }
                 } else {
-                    showMessage('อุปกรณ์ของคุณไม่รองรับ Web NFC', 'error');
-                    
-                    // Simulation fallback
-                    setTimeout(() => {
-                        if (cardsData.length > 0) {
-                            const randomCard = cardsData[Math.floor(Math.random() * cardsData.length)];
-                            displayScannedCardData(randomCard);
-                        } else {
-                            showMessage('ไม่พบข้อมูลการ์ดสำหรับสแกน', 'error');
-                        }
-                    }, 2000);
+                    showMessage('รูปแบบข้อมูลไม่ถูกต้อง', 'error');
                 }
-            });
+            };
+        } catch (error) {
+            showMessage(`การสแกนล้มเหลว: ${error.message}`, 'error');
+        }
+    } else {
+        // กรณีเบราว์เซอร์ไม่รองรับ
+        showMessage('อุปกรณ์ของคุณไม่รองรับ Web NFC', 'error');
+        
+        // โค้ดจำลอง (simulation) เดิมที่คุณใช้
+        setTimeout(() => {
+            if (cardsData.length > 0) {
+                const randomCard = cardsData[Math.floor(Math.random() * cardsData.length)];
+                displayScannedCardData(randomCard);
+            } else {
+                showMessage('ไม่พบข้อมูลการ์ดสำหรับสแกน', 'error');
+            }
+        }, 2000);
+    }
+});
 
             // Navigation
             navCollection.addEventListener('click', () => {
                 showScreen(collectionScreen);
                 fetchCardsFromFirebase();
             });
-            const navHome = document.getElementById('nav-home');
-            if (navHome) {
-                navHome.addEventListener('click', () => { showScreen(collectionScreen); fetchCardsFromFirebase(); });
-            }
+            navHome.addEventListener('click', () => { showScreen(collectionScreen); fetchCardsFromFirebase(); }); // For demo, Home button goes to collection
             navStore.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
             navProfile.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
         });
     </script>
 </body>
 </html>
+
