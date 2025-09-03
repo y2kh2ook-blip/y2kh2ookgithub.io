@@ -272,11 +272,15 @@ const firebaseConfig = {
                 <div class="flex justify-between items-end mt-8">
                     <div class="flex items-center space-x-2">
                         <span class="text-gray-700 text-lg">
-                            <svg class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v-2m0 0a4 4 0 00-4-4h4a4 4 0 004 4v2a4 4 0 00-4-4zM7 9a5 5 0 00-5 5v2a5 5 0 005 5h10a5 5 0 005-5v-2a5 5 0 00-5-5z" />
-                            </svg>
-                            ${card.stats ? card.stats.attack : 'N/A'}
-                        </span>
+                            <svg class="h-6 w-6 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M14.653 10.347a.5.5 0 00-.817-.184L12 11.232l-1.836-1.069a.5.5 0 00-.817.184l-2.43 4.204a.5.5 0 00.408.736h1.23v2.32a.5.5 0 00.5.5h2.183a.5.5 0 00.5-.5v-2.32h1.23a.5.5 0 00.408-.736l-2.43-4.204z" />
+</svg>
+<span class="text-lg">${card.stats ? card.stats.attack : 'N/A'}</span>
+
+<svg class="h-6 w-6 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 010 16z" />
+</svg>
+<span class="text-lg">${card.stats ? card.stats.defense : 'N/A'}</span>
                         <span class="text-gray-700 text-lg">
                             <svg class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -328,11 +332,15 @@ const firebaseConfig = {
                 <div class="flex justify-between items-end mt-8">
                     <div class="flex items-center space-x-2">
                         <span class="text-gray-700 text-lg">
-                            <svg class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v-2m0 0a4 4 0 00-4-4h4a4 4 0 004 4v2a4 4 0 00-4-4zM7 9a5 5 0 00-5 5v2a5 5 0 005 5h10a5 5 0 005-5v-2a5 5 0 00-5-5z" />
-                            </svg>
-                            ${data.stats ? data.stats.attack : 'N/A'}
-                        </span>
+                            <svg class="h-6 w-6 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M14.653 10.347a.5.5 0 00-.817-.184L12 11.232l-1.836-1.069a.5.5 0 00-.817.184l-2.43 4.204a.5.5 0 00.408.736h1.23v2.32a.5.5 0 00.5.5h2.183a.5.5 0 00.5-.5v-2.32h1.23a.5.5 0 00.408-.736l-2.43-4.204z" />
+</svg>
+<span class="text-lg">${card.stats ? card.stats.attack : 'N/A'}</span>
+
+<svg class="h-6 w-6 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 18a8 8 0 110-16 8 8 0 010 16z" />
+</svg>
+<span class="text-lg">${card.stats ? card.stats.defense : 'N/A'}</span>
                         <span class="text-gray-700 text-lg">
                             <svg class="h-6 w-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
