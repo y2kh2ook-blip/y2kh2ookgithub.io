@@ -49,13 +49,18 @@
                 <h1 class="logo-text text-gray-800">CardVerse</h1>
                 <p class="text-gray-500 mt-2">Phygital Game Card</p>
             </div>
-            <div class="space-y-4 mb-8">
-                <button id="google-login-btn" class="btn-social flex items-center justify-center w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-md">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M21.35 12.04c0-.79-.07-1.54-.18-2.29H12v4.32h4.94a5.15 5.15 0 01-2.23 3.37v2.8h3.6c2.1-1.94 3.32-4.8 3.32-8.3z"/><path d="M12 20.01c-3.14 0-5.83-1.74-7.29-4.32l3.6-2.8c.84.58 1.96.93 3.69.93 1.83 0 3.35-.6 4.62-1.63L18.4 17.5c-1.3 1.25-3.08 2.01-5.11 2.01z"/><path d="M4.71 12c0-1.02.2-1.98.54-2.86l-3.6-2.8c-.85 1.77-1.33 3.79-1.33 5.66s.48 3.89 1.33 5.66l3.6-2.8c-.34-.88-.54-1.84-.54-2.86z"/><path d="M12 4.01c1.92 0 3.53.64 4.62 1.63L20.21 2c-1.26-1.18-2.94-1.9-4.9-1.9-2.73 0-5.13 1.08-6.93 2.86l3.6 2.8c.95-.58 2.07-.93 3.53-.93z"/></svg>
-                    เข้าสู่ระบบด้วย Google
+            <form id="login-form" class="space-y-4 mb-8">
+                <input type="text" id="username-input" placeholder="ชื่อผู้ใช้" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none input-field">
+                <input type="password" id="password-input" placeholder="รหัสผ่าน" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none input-field">
+                <button type="submit" class="w-full py-3 px-4 bg-gray-900 hover:bg-gray-700 text-white font-semibold rounded-xl shadow-md">
+                    เข้าสู่ระบบ
                 </button>
-            </div>
-            <p class="text-gray-500 text-sm">ปัจจุบันเป็นเวอร์ชันทดสอบ จึงใช้งานได้เฉพาะฟังก์ชันบางอย่าง</p>
+            </form>
+            <button id="google-login-btn" class="btn-social flex items-center justify-center w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-md">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M21.35 12.04c0-.79-.07-1.54-.18-2.29H12v4.32h4.94a5.15 5.15 0 01-2.23 3.37v2.8h3.6c2.1-1.94 3.32-4.8 3.32-8.3z"/><path d="M12 20.01c-3.14 0-5.83-1.74-7.29-4.32l3.6-2.8c.84.58 1.96.93 3.69.93 1.83 0 3.35-.6 4.62-1.63L18.4 17.5c-1.3 1.25-3.08 2.01-5.11 2.01z"/><path d="M4.71 12c0-1.02.2-1.98.54-2.86l-3.6-2.8c-.85 1.77-1.33 3.79-1.33 5.66s.48 3.89 1.33 5.66l3.6-2.8c-.34-.88-.54-1.84-.54-2.86z"/><path d="M12 4.01c1.92 0 3.53.64 4.62 1.63L20.21 2c-1.26-1.18-2.94-1.9-4.9-1.9-2.73 0-5.13 1.08-6.93 2.86l3.6 2.8c.95-.58 2.07-.93 3.53-.93z"/></svg>
+                เข้าสู่ระบบด้วย Google
+            </button>
+            <p class="text-gray-500 text-sm mt-4">ปัจจุบันเป็นเวอร์ชันทดสอบ จึงใช้งานได้เฉพาะฟังก์ชันบางอย่าง</p>
         </div>
     </div>
 
@@ -187,6 +192,9 @@
 
     const elements = {
         // Login
+        loginForm: document.getElementById('login-form'),
+        usernameInput: document.getElementById('username-input'),
+        passwordInput: document.getElementById('password-input'),
         googleLoginBtn: document.getElementById('google-login-btn'),
         // Collection
         cardGrid: document.getElementById('card-grid'),
@@ -219,10 +227,13 @@
     let currentUserId = null;
 
     // --- Reusable Functions ---
-    const showScreen = (screenName) => {
-        Object.values(screens).forEach(screen => screen.style.display = 'none');
-        if (screens[screenName]) {
-            screens[screenName].style.display = 'flex';
+    const showScreen = (screenId) => {
+        Object.values(screens).forEach(screen => {
+            if (screen) screen.style.display = 'none';
+        });
+        const screenToShow = document.getElementById(screenId);
+        if (screenToShow) {
+            screenToShow.style.display = 'flex';
         }
     };
     
@@ -268,9 +279,9 @@
 
     const openCardDetails = (card, isMarketplace) => {
         elements.modalContent.innerHTML = `
-            <h3 class="text-2xl font-bold mb-4 text-yellow-600">${card.name}</h3>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">${card.name}</h3>
             <img src="${card.image_url}" alt="${card.name}" class="w-full h-auto mx-auto mb-4 rounded-xl shadow-lg border-4 border-amber-400"/>
-            <p class="text-sm text-gray-800 mt-4 mb-4">${card.description}</p>
+            <p class="text-sm text-gray-600 mt-4 mb-4">${card.description}</p>
             <div class="bg-gray-100 p-4 rounded-xl text-left">
                 <p class="text-sm text-gray-700"><b>ค่าพลัง:</b> ATT: ${card.stats ? card.stats.attack : 'N/A'}, DEF: ${card.stats ? card.stats.defense : 'N/A'}</p>
                 <p class="text-sm text-gray-700"><b>ระดับ:</b> ${card.rarity}</p>
@@ -278,7 +289,7 @@
             </div>
             ${isMarketplace ? `<button id="buy-card-button" class="w-full mt-4 py-2 px-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700">ซื้อการ์ด</button>` : ''}
         `;
-        screens.modal.style.display = 'flex';
+        showScreen('card-modal');
         
         if (isMarketplace) {
             const buyButton = document.getElementById('buy-card-button');
@@ -292,7 +303,7 @@
     const fetchUserCards = async () => {
         elements.loadingMessageCollection.style.display = 'block';
         if (!currentUserId) {
-            showScreen('login');
+            showScreen('login-screen');
             elements.loadingMessageCollection.style.display = 'none';
             return;
         }
@@ -345,7 +356,6 @@
             
             await cardDocRef.set(cardData);
             showMessage(`เพิ่ม ${cardData.name} เข้าคอลเล็กชันสำเร็จ!`, 'success');
-            // Re-fetch user cards after adding the new one
             await fetchUserCards();
         } catch (error) {
             console.error("Error adding card to user's collection: ", error);
@@ -355,18 +365,42 @@
 
     const buyCard = async (cardData) => {
         await addCardToUserCollection(cardData);
-        screens.modal.style.display = 'none';
-        showScreen('collection');
+        showScreen('collection-screen');
         setActiveNav(elements.navCollection);
-        // We already call fetchUserCards inside addCardToUserCollection, so no need to call it again here.
+        screens.modal.style.display = 'none';
     };
 
     // --- Event Listeners ---
+    elements.loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = elements.usernameInput.value.trim();
+        const password = elements.passwordInput.value.trim();
+
+        if (userId && password) {
+            // Mock login since we don't have a real auth system
+            const userRef = db.collection('users').doc(userId);
+            const userDoc = await userRef.get();
+            if (!userDoc.exists) {
+                await userRef.set({
+                    username: userId
+                });
+            }
+            
+            sessionStorage.setItem('currentUserId', userId);
+            currentUserId = userId;
+            showScreen('collection-screen');
+            setActiveNav(elements.navCollection);
+            fetchUserCards();
+        } else {
+            alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+        }
+    });
+
     elements.googleLoginBtn.addEventListener('click', () => {
         // Mock login for demo purposes
         currentUserId = 'demo_user';
         sessionStorage.setItem('currentUserId', currentUserId);
-        showScreen('collection');
+        showScreen('collection-screen');
         setActiveNav(elements.navCollection);
         fetchUserCards();
     });
@@ -410,7 +444,7 @@
     });
     
     elements.scanButtonCollection.addEventListener('click', () => {
-        showScreen('nfc');
+        showScreen('nfc-screen');
     });
     
     elements.scanButtonNFC.addEventListener('click', () => {
@@ -419,13 +453,13 @@
     });
 
     elements.navCollection.addEventListener('click', () => {
-        showScreen('collection');
+        showScreen('collection-screen');
         setActiveNav(elements.navCollection);
         fetchUserCards();
     });
 
     elements.navStore.addEventListener('click', () => {
-        showScreen('marketplace');
+        showScreen('marketplace-screen');
         setActiveNav(elements.navStore);
         fetchMarketplaceCards();
     });
@@ -433,11 +467,11 @@
     elements.navProfile.addEventListener('click', () => alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'));
     elements.navHome.addEventListener('click', () => {
         if (currentUserId) {
-            showScreen('collection');
+            showScreen('collection-screen');
             setActiveNav(elements.navCollection);
             fetchUserCards();
         } else {
-            showScreen('login');
+            showScreen('login-screen');
         }
     });
     // Nav listeners for marketplace screen
@@ -449,10 +483,13 @@
     // --- Initial state check ---
     currentUserId = sessionStorage.getItem('currentUserId');
     if (currentUserId) {
-        showScreen('collection');
+        showScreen('collection-screen');
         setActiveNav(elements.navCollection);
         fetchUserCards();
     } else {
-        showScreen('login');
+        showScreen('login-screen');
     }
 });
+    </script>
+</body>
+</html>
