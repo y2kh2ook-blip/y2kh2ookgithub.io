@@ -30,6 +30,123 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             letter-spacing: 2px;
         }
+
+        /* --- Gameplay CSS --- */
+        .game-board {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            background-image: url('https://i.ibb.co/Ctnz3Yg/card-background.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .player-area, .opponent-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .board, .hand {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            min-height: 120px;
+            padding: 10px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            width: 100%;
+        }
+        .card {
+            width: 100px;
+            height: 140px;
+            background-color: rgba(36, 41, 46, 0.8);
+            border: 2px solid #555;
+            border-radius: 8px;
+            padding: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .card.active {
+            border-color: #3498db;
+            box-shadow: 0 0 10px #3498db;
+        }
+        .card h4 {
+            font-size: 0.9rem;
+            margin: 5px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .stats {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .action-btn:hover {
+            background-color: #34495e;
+        }
+        .action-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .life-bar {
+            background-color: #e74c3c;
+            height: 10px;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+        .life-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .log-container {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            right: 20px;
+            background-color: rgba(22, 27, 34, 0.8);
+            border-radius: 8px;
+            padding: 10px;
+            height: 80px;
+            overflow-y: scroll;
+        }
+        .log-container p {
+            margin: 0;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -114,13 +231,44 @@
         </div>
     </div>
 
-    <div id="battle-screen" class="screen flex-1 flex flex-col items-center justify-center p-4">
-        <h1 class="text-4xl font-bold text-white mb-8">⚔️ หน้าการต่อสู้</h1>
-        <p class="text-center text-gray-400">หน้าจอจำลองสำหรับโหมด Battle</p>
-        <div class="mt-8 text-sm text-gray-500">
-            <p><strong>ด้านบน:</strong> HP ผู้เล่น & คู่ต่อสู้</p>
-            <p><strong>กลาง:</strong> สนามการ์ด & เอฟเฟกต์พลังงาน</p>
-            <p><strong>ด้านล่าง:</strong> มือการ์ด & ปุ่มคำสั่ง</p>
+    <div id="battle-screen" class="screen flex-1 flex flex-col items-center justify-center p-4 game-board">
+        <div class="opponent-area">
+            <div class="life-info">
+                <span class="text-white text-xl font-bold">Player B</span>
+                <div class="flex-grow bg-gray-500 rounded-full h-2.5">
+                    <div id="opponent-life-bar" class="life-bar" style="width: 100%;"></div>
+                </div>
+                <span id="opponent-life" class="text-white text-xl">15</span>
+            </div>
+            <div id="opponent-board" class="board">
+                <p class="text-gray-400">Opponent's Board</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center justify-center gap-4 my-auto">
+            <div id="game-status" class="text-2xl font-bold text-yellow-400"></div>
+            <div class="actions">
+                <button id="end-turn-btn" class="action-btn">จบเทิร์น</button>
+            </div>
+        </div>
+        
+        <div class="player-area">
+            <div id="player-board" class="board">
+                <p class="text-gray-400">Your Board</p>
+            </div>
+            <div id="player-hand" class="hand">
+                <p class="text-gray-400">Your Hand</p>
+            </div>
+            <div class="life-info">
+                <span class="text-white text-xl font-bold">Player A</span>
+                <div class="flex-grow bg-gray-500 rounded-full h-2.5">
+                    <div id="player-life-bar" class="life-bar" style="width: 100%;"></div>
+                </div>
+                <span id="player-life" class="text-white text-xl">15</span>
+            </div>
+        </div>
+        <div id="log" class="log-container">
+            <p>--- Game Log ---</p>
         </div>
     </div>
 
@@ -419,14 +567,17 @@ const firebaseConfig = {
             });
             
             // Navigation from Home Screen
-            navBattle.addEventListener('click', () => showScreen('battle-screen'));
+            navBattle.addEventListener('click', () => { 
+                showScreen('battle-screen'); 
+                startGame(); // เรียกใช้ฟังก์ชัน startGame เมื่อเข้าหน้า Battle
+            });
             navDeck.addEventListener('click', () => { showScreen('deck-builder-screen'); fetchCardsFromFirebase(); });
             navMarket.addEventListener('click', () => showScreen('marketplace-screen'));
             navWallet.addEventListener('click', () => showScreen('wallet-screen'));
             navLore.addEventListener('click', () => showScreen('lore-screen'));
 
             // Navigation from Main Nav Bar
-            document.getElementById('nav-home-main').addEventListener('click', () => showScreen('home-screen', document.getElementById('nav-home-main')));
+            document.getElementById('nav-home-main').addEventListener('click', () => { showScreen('home-screen', document.getElementById('nav-home-main')); });
             document.getElementById('nav-collection-main').addEventListener('click', () => { showScreen('collection-screen', document.getElementById('nav-collection-main')); fetchCardsFromFirebase(); });
             document.getElementById('nav-store-main').addEventListener('click', () => { showScreen('marketplace-screen', document.getElementById('nav-store-main')); alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'); });
             document.getElementById('nav-profile-main').addEventListener('click', () => { showScreen('wallet-screen', document.getElementById('nav-profile-main')); alert('ฟีเจอร์นี้ยังไม่เปิดใช้งาน'); });
@@ -474,7 +625,7 @@ const firebaseConfig = {
                             } else {
                                 showMessage('รูปแบบข้อมูลไม่ถูกต้อง', 'error');
                             }
-                        };
+                        }
                     } catch (error) {
                         showMessage(`การสแกนล้มเหลว: ${error.message}`, 'error');
                     }
@@ -502,6 +653,269 @@ const firebaseConfig = {
             // Initial load
             showScreen('login-screen');
             fetchCardsFromFirebase();
+            
+            // ==========================================================
+            // --- GAMEPLAY CODE (FROM PREVIOUS RESPONSE) ---
+            // ==========================================================
+
+            // --- Card Data for Gameplay ---
+            // หมายเหตุ: โค้ดนี้ใช้ข้อมูลการ์ดแยกต่างหาก เพื่อให้สามารถรันเกมเพลย์ได้ทันที
+            const cards = [
+                { id: 'c1', name: 'Soldier Spirit', type: 'Spirit', atk: 2, def: 2, cost: 1, rarity: 'Common' },
+                { id: 'c2', name: 'Mekong Serpent', type: 'Spirit', atk: 4, def: 3, cost: 2, rarity: 'Rare', ability: 'Passive: +1 ATK to all water Spirits.' },
+                { id: 'c3', name: 'Naga Sovereign', type: 'Spirit', atk: 6, def: 5, cost: 3, rarity: 'Legendary' },
+                { id: 'v1', name: 'Virtue of Compassion', type: 'Virtue', cost: 1, rarity: 'Uncommon', ability: 'Heal +2 Life to a player.' },
+                { id: 'v2', name: 'Virtue of Courage', type: 'Virtue', cost: 1, rarity: 'Rare', ability: 'Give a Spirit +2 ATK for this turn.' },
+                { id: 'f1', name: 'Moonlit Field', type: 'Field', cost: 2, rarity: 'Epic', ability: 'Passive: All Spirits get +1 DEF.' },
+                { id: 'r1', name: 'Ritual of Binding', type: 'Ritual', cost: 2, rarity: 'Uncommon', ability: 'Bind an opponent Spirit. It cannot attack for 1 turn.' },
+                { id: 'c1-2', name: 'Soldier Spirit', type: 'Spirit', atk: 2, def: 2, cost: 1, rarity: 'Common' },
+                { id: 'c1-3', name: 'Soldier Spirit', type: 'Spirit', atk: 2, def: 2, cost: 1, rarity: 'Common' },
+                { id: 'c2-2', name: 'Mekong Serpent', type: 'Spirit', atk: 4, def: 3, cost: 2, rarity: 'Rare', ability: 'Passive: +1 ATK to all water Spirits.' },
+                { id: 'c2-3', name: 'Mekong Serpent', type: 'Spirit', atk: 4, def: 3, cost: 2, rarity: 'Rare', ability: 'Passive: +1 ATK to all water Spirits.' },
+                { id: 'c3-2', name: 'Naga Sovereign', type: 'Spirit', atk: 6, def: 5, cost: 3, rarity: 'Legendary' },
+                { id: 'v1-2', name: 'Virtue of Compassion', type: 'Virtue', cost: 1, rarity: 'Uncommon', ability: 'Heal +2 Life to a player.' },
+                { id: 'v1-3', name: 'Virtue of Compassion', type: 'Virtue', cost: 1, rarity: 'Uncommon', ability: 'Heal +2 Life to a player.' },
+                { id: 'v2-2', name: 'Virtue of Courage', type: 'Virtue', cost: 1, rarity: 'Rare', ability: 'Give a Spirit +2 ATK for this turn.' },
+                { id: 'f1-2', name: 'Moonlit Field', type: 'Field', cost: 2, rarity: 'Epic', ability: 'Passive: All Spirits get +1 DEF.' },
+                { id: 'r1-2', name: 'Ritual of Binding', type: 'Ritual', cost: 2, rarity: 'Uncommon', ability: 'Bind an opponent Spirit. It cannot attack for 1 turn.' },
+                { id: 'c4', name: 'Monk Warrior', type: 'Spirit', atk: 3, def: 3, cost: 2, rarity: 'Common' },
+                { id: 'c5', name: 'Sacred Tiger', type: 'Spirit', atk: 5, def: 4, cost: 3, rarity: 'Rare' },
+                { id: 'c6', name: 'Celestial Phoenix', type: 'Spirit', atk: 7, def: 6, cost: 4, rarity: 'Legendary' },
+                { id: 'v3', name: 'Virtue of Justice', type: 'Virtue', cost: 2, rarity: 'Uncommon', ability: 'Destroy a Spirit with ATK 3 or less.' },
+                { id: 'f2', name: 'Cosmic Battlefield', type: 'Field', cost: 3, rarity: 'Epic', ability: 'Passive: All Spirits get +1 ATK.' },
+            ];
+            
+            // --- Game State ---
+            let deckA = [];
+            let deckB = [];
+            let playerHand = [];
+            let opponentHand = [];
+            let playerBoard = [];
+            let opponentBoard = [];
+            let playerLife = 15;
+            let opponentLife = 15;
+            let currentPlayer = 'A';
+            let playerEnergy = 0;
+            let opponentEnergy = 0;
+            let logElement = document.getElementById('log');
+
+            // --- UI Elements (Gameplay) ---
+            const playerLifeEl = document.getElementById('player-life');
+            const opponentLifeEl = document.getElementById('opponent-life');
+            const playerLifeBarEl = document.getElementById('player-life-bar');
+            const opponentLifeBarEl = document.getElementById('opponent-life-bar');
+            const playerHandEl = document.getElementById('player-hand');
+            const playerBoardEl = document.getElementById('player-board');
+            const opponentBoardEl = document.getElementById('opponent-board');
+            const gameStatusEl = document.getElementById('game-status');
+            const endTurnBtn = document.getElementById('end-turn-btn');
+
+            // --- Gameplay Functions ---
+            const shuffleDeck = (deck) => {
+                for (let i = deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [deck[i], deck[j]] = [deck[j], deck[i]];
+                }
+            };
+            
+            const createGameplayCardElement = (card, location, owner = 'player') => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                cardEl.innerHTML = `
+                    <h4>${card.name}</h4>
+                    <p class="stats">${card.type === 'Spirit' ? `ATK: ${card.atk} / DEF: ${card.def}` : ''}</p>
+                    <p class="stats">${card.ability ? card.ability : ''}</p>
+                `;
+                if (location === 'hand') {
+                    cardEl.onclick = () => playCard(card);
+                }
+                if (location === 'board' && owner === 'player') {
+                    cardEl.onclick = () => selectAttacker(card);
+                }
+                return cardEl;
+            };
+
+            const updateGameplayUI = () => {
+                playerLifeEl.textContent = playerLife;
+                opponentLifeEl.textContent = opponentLife;
+                playerLifeBarEl.style.width = (playerLife / 15) * 100 + '%';
+                opponentLifeBarEl.style.width = (opponentLife / 15) * 100 + '%';
+                gameStatusEl.textContent = `Turn: Player ${currentPlayer}`;
+                playerHandEl.innerHTML = '';
+                playerBoardEl.innerHTML = '';
+                opponentBoardEl.innerHTML = '';
+
+                playerHand.forEach(card => playerHandEl.appendChild(createGameplayCardElement(card, 'hand')));
+                playerBoard.forEach(card => playerBoardEl.appendChild(createGameplayCardElement(card, 'board')));
+                opponentBoard.forEach(card => opponentBoardEl.appendChild(createGameplayCardElement(card, 'board', 'opponent')));
+            };
+
+            const log = (message) => {
+                const p = document.createElement('p');
+                p.textContent = message;
+                logElement.appendChild(p);
+                logElement.scrollTop = logElement.scrollHeight;
+            };
+
+            const checkWinCondition = () => {
+                if (playerLife <= 0) {
+                    gameStatusEl.textContent = 'Player B Wins!';
+                    endTurnBtn.disabled = true;
+                    log('Player B has won the game!');
+                    return true;
+                }
+                if (opponentLife <= 0) {
+                    gameStatusEl.textContent = 'Player A Wins!';
+                    endTurnBtn.disabled = true;
+                    log('Player A has won the game!');
+                    return true;
+                }
+                return false;
+            };
+
+            window.startGame = () => {
+                // Reset game state
+                deckA = [...cards];
+                deckB = [...cards];
+                playerHand = [];
+                opponentHand = [];
+                playerBoard = [];
+                opponentBoard = [];
+                playerLife = 15;
+                opponentLife = 15;
+                currentPlayer = 'A';
+                logElement.innerHTML = '<p>--- Game Log ---</p>';
+                endTurnBtn.disabled = false;
+                
+                // Setup & Shuffle Decks
+                shuffleDeck(deckA);
+                shuffleDeck(deckB);
+                
+                // Initial Draw
+                for (let i = 0; i < 5; i++) {
+                    playerHand.push(deckA.pop());
+                    opponentHand.push(deckB.pop());
+                }
+                
+                log('Game Started! Player A begins.');
+                startTurn();
+            };
+
+            const startTurn = () => {
+                log(`--- Player ${currentPlayer}'s Turn ---`);
+                // Draw Phase
+                if (currentPlayer === 'A') {
+                    if (deckA.length > 0) {
+                        playerHand.push(deckA.pop());
+                    }
+                } else {
+                    if (deckB.length > 0) {
+                        opponentHand.push(deckB.pop());
+                    }
+                }
+                updateGameplayUI();
+            };
+            
+            const playCard = (card) => {
+                if (currentPlayer !== 'A') return;
+                
+                playerHand = playerHand.filter(c => c.id !== card.id);
+                
+                if (card.type === 'Spirit') {
+                    playerBoard.push(card);
+                    log(`Player A played "${card.name}" to the board.`);
+                } else if (card.type === 'Virtue') {
+                    playerLife += 2;
+                    log(`Player A used "${card.name}" and healed 2 life.`);
+                } else if (card.type === 'Ritual') {
+                    if (opponentBoard.length > 0) {
+                        const targetIndex = Math.floor(Math.random() * opponentBoard.length);
+                        const destroyedCard = opponentBoard.splice(targetIndex, 1)[0];
+                        log(`Player A used "${card.name}" and destroyed "${destroyedCard.name}".`);
+                    } else {
+                        log(`Player A used "${card.name}" but there were no Spirits to destroy.`);
+                    }
+                }
+                
+                updateGameplayUI();
+            };
+            
+            let selectedAttacker = null;
+
+            const selectAttacker = (card) => {
+                if (currentPlayer !== 'A') return;
+                
+                if (selectedAttacker) {
+                    selectedAttacker = null;
+                    const activeCard = document.querySelector('.card.active');
+                    if (activeCard) activeCard.classList.remove('active');
+                    log("Deselected attacker.");
+                } else {
+                    selectedAttacker = card;
+                    const cardElements = document.querySelectorAll('#player-board .card');
+                    cardElements.forEach(el => {
+                        if (el.querySelector('h4').textContent === card.name) {
+                            el.classList.add('active');
+                        }
+                    });
+                    log(`Selected "${card.name}" to attack.`);
+                    attackPhase();
+                }
+            };
+            
+            const attackPhase = () => {
+                if (selectedAttacker) {
+                    log(`Player A's "${selectedAttacker.name}" attacks!`);
+                    
+                    const damage = selectedAttacker.atk;
+                    opponentLife -= damage;
+                    log(`Player B takes ${damage} damage. Life left: ${opponentLife}`);
+                    
+                    selectedAttacker = null;
+                    const activeCard = document.querySelector('.card.active');
+                    if (activeCard) activeCard.classList.remove('active');
+                    
+                    if (checkWinCondition()) return;
+                }
+                updateGameplayUI();
+            };
+
+            const opponentTurn = () => {
+                log('--- Player B\'s Turn ---');
+                
+                const cardToPlay = opponentHand.find(c => c.type === 'Spirit');
+                if (cardToPlay) {
+                    opponentHand = opponentHand.filter(c => c.id !== cardToPlay.id);
+                    opponentBoard.push(cardToPlay);
+                    log(`Player B plays "${cardToPlay.name}".`);
+                }
+                
+                setTimeout(() => {
+                    opponentBoard.forEach(spirit => {
+                        log(`Player B's "${spirit.name}" attacks!`);
+                        playerLife -= spirit.atk;
+                        log(`Player A takes ${spirit.atk} damage. Life left: ${playerLife}`);
+                    });
+                    
+                    if (checkWinCondition()) return;
+                    
+                    currentPlayer = 'A';
+                    log('Player B ends turn.');
+                    startTurn();
+                }, 1000);
+            };
+
+            endTurnBtn.onclick = () => {
+                if (currentPlayer === 'A') {
+                    currentPlayer = 'B';
+                    log('Player A ends turn.');
+                    opponentTurn();
+                }
+            };
+
+            // ==========================================================
+            // --- END OF GAMEPLAY CODE ---
+            // ==========================================================
         });
     </script>
 </body>
